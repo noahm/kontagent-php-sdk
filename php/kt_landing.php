@@ -11,7 +11,7 @@
   // 
 
 $facebook = new KtFacebook(array('appId'  => '117179248303858',
-                                 'secret' => 'fd819a0c9d76e1b35060df8abdb06fb5',
+                                 'secret' => FB_SECRET,
                                  'cookie' => true,
                                  )
                            );
@@ -24,11 +24,24 @@ if( isset($_GET['fb_sig_user']) ) $uid = $_GET['fb_sig_user'];
 //
 // Track Install
 //
+
+$session = $facebook->getSession();
+if( !isset($session) )
+{
+    $access_token = $facebook->getAccessTokenFromSessionKey($_GET['fb_sig_session_key']);
+}
+else
+{
+    $access_token = $session['access_token'];
+}
+
+
 if( !isset($_COOKIE['kt_handled_installed']) && $uid != null)
 {
     $fb_cookie_arry = $facebook->api(array('method' => 'data.getcookies',
                                            'name'=>'kt_just_installed',
-                                           'uid' => $uid));
+                                           'uid' => $uid,
+                                           'access_token' => $access_token));
     $arry_size = sizeof($fb_cookie_arry);
     for($i = 0; $i < $arry_size; $i++)
     {
@@ -41,6 +54,7 @@ if( !isset($_COOKIE['kt_handled_installed']) && $uid != null)
             $server_output = $facebook->api(array('method' => 'data.setcookie',
                                                   'name' => 'kt_just_installed',
                                                   'uid' =>$uid,
+                                                  'access_token' => $access_token,
                                                   'expires' => time()-345600));
             break;
         }

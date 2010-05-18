@@ -87,4 +87,24 @@ class KtFacebook extends Facebook
       }
       exit;
   }
+
+  public function getAccessTokenFromSessionKey($session_key)
+  {
+      $access_token = null;
+      $ch = curl_init();
+      $data = array('type' => 'client_cred',
+                    'client_id'=>$this->getAppId(),
+                    'client_secret'=>$this->getApiSecret(),
+                    'sessions'=>$session_key,
+                    );
+      curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/oauth/access_token');
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+      $server_output = curl_exec($ch);
+      curl_close($ch);
+      $tmp_arry = split("=", $server_output);
+      $access_token = $tmp_arry[1];
+      return $access_token;
+  }
 }
