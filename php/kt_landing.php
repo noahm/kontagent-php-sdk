@@ -10,7 +10,7 @@
   // been included prior to the loading of this file.
   // 
 
-$facebook = new KtFacebook(array('appId'  => '117179248303858',
+$facebook = new KtFacebook(array('appId'  => FB_ID,
                                  'secret' => FB_SECRET,
                                  'cookie' => true,
                                  )
@@ -21,27 +21,18 @@ $kt = new Kontagent('tofoo.dyndns.org:8080', 'aaaa');
 $uid = null;
 if( isset($_GET['fb_sig_user']) ) $uid = $_GET['fb_sig_user'];
 
+
+$session = $facebook->getSession();
+
 //
 // Track Install
 //
-
-$session = $facebook->getSession();
-if( !isset($session) )
-{
-    $access_token = $facebook->getAccessTokenFromSessionKey($_GET['fb_sig_session_key']);
-}
-else
-{
-    $access_token = $session['access_token'];
-}
-
-
-if( !isset($_COOKIE['kt_handled_installed']) && $uid != null)
+if( !isset($_COOKIE[$kt->gen_kt_handled_installed_cookie_key(FB_ID)]) &&
+    $uid != null )
 {
     $fb_cookie_arry = $facebook->api(array('method' => 'data.getcookies',
                                            'name'=>'kt_just_installed',
-                                           'uid' => $uid,
-                                           'access_token' => $access_token));
+                                           'uid' => $uid));
     $arry_size = sizeof($fb_cookie_arry);
     for($i = 0; $i < $arry_size; $i++)
     {
@@ -54,7 +45,6 @@ if( !isset($_COOKIE['kt_handled_installed']) && $uid != null)
             $server_output = $facebook->api(array('method' => 'data.setcookie',
                                                   'name' => 'kt_just_installed',
                                                   'uid' =>$uid,
-                                                  'access_token' => $access_token,
                                                   'expires' => time()-345600));
             break;
         }
@@ -63,7 +53,8 @@ if( !isset($_COOKIE['kt_handled_installed']) && $uid != null)
     // kt_handle_installed is set to prevent further round
     // trip to facebook to get the fb cookies
     if( isset($_GET['fb_sig_added']) && $_GET['fb_sig_added'] == 1 )
-        setcookie('kt_handled_installed', 'done'); 
+        if( !headers_sent() ) 
+            setcookie( $kt->gen_kt_handled_installed_cookie_key(FB_ID), 'done' ); 
 }
 
 //

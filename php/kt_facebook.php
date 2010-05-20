@@ -4,6 +4,14 @@
 
 class KtFacebook extends Facebook
 {
+
+  /**
+   * Session is not available. However, we can still get the access_token
+   * by using the old session_key, client_key. If it has already converted,
+   * don't do the conversion again to save us the round trip time. 
+   */
+    protected $tokenSessionLoaded = false;
+
   /**
    *
    *
@@ -29,6 +37,29 @@ class KtFacebook extends Facebook
 
   }
 
+  //
+  // Overridden
+  //
+  public function getSession()
+  {
+      $session = parent::getSession();
+      if(!$session && isset($_REQUEST['fb_sig_session_key']))
+      {
+          if(!$this->tokenSessionLoaded){
+              $access_token = $this->getAccessTokenFromSessionKey($_REQUEST['fb_sig_session_key']);
+              $session = array('access_token' => $access_token,
+                               'uid' => $_REQUEST['fb_sig_user']);
+              $this->session = $session;
+              $this->tokenSessionLoaded = true;
+          }else{
+              $session = $this->session;
+          }
+      }
+      return $session;
+  }
+  //
+  // Overridden
+  //
   public function getLoginUrl($params=array(), $forward_to_current_url=true)
   {
       if($forward_to_current_url)
@@ -63,7 +94,7 @@ class KtFacebook extends Facebook
                             ), $params)
                            );
   }
-  
+
   public function redirect($url)
   {
       error_log("inside redirect: ".$url);//xxx
@@ -88,6 +119,7 @@ class KtFacebook extends Facebook
       exit;
   }
 
+
   public function getAccessTokenFromSessionKey($session_key)
   {
       $access_token = null;
@@ -102,6 +134,8 @@ class KtFacebook extends Facebook
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
       $server_output = curl_exec($ch);
+      error_log($server_output . " ...............");//xxx
+      error_log(time().".....");//xxx
       curl_close($ch);
       $tmp_arry = split("=", $server_output);
       $access_token = $tmp_arry[1];

@@ -34,6 +34,11 @@ class Kontagent
         }
     }
 
+    public function gen_kt_handled_installed_cookie_key($fb_api_key)
+    {
+        return 'kt_handled_installed_'.$fb_api_key;
+    }
+        
     public function gen_long_tracking_code()
     {
         return substr(uniqid(rand()), -16);
