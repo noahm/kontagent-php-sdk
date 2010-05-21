@@ -39,9 +39,9 @@ class Kontagent
         return $this->m_send_msg_from_js;
     }
     
-    public function gen_kt_handled_installed_cookie_key($fb_api_key)
+    public function gen_kt_handled_installed_cookie_key($fb_api_key, $uid)
     {
-        return 'kt_handled_installed_'.$fb_api_key;
+        return 'kt_handled_installed_'.$fb_api_key."_".$uid;
     }
         
     public function gen_long_tracking_code()
