@@ -34,6 +34,11 @@ class Kontagent
         }
     }
 
+    public function get_send_msg_from_js()
+    {
+        return $this->m_send_msg_from_js;
+    }
+    
     public function gen_kt_handled_installed_cookie_key($fb_api_key)
     {
         return 'kt_handled_installed_'.$fb_api_key;
@@ -157,6 +162,16 @@ class Kontagent
         $params['kt_ut'] = $long_tracking_code;
         $params['kt_uid'] = $sender_uid;
         $this->add_subtype123($params, $st1, $st2, $st3);
+        if(isset($_REQUEST['session'])){
+            $param['session'] = json_decode(get_magic_quotes_gpc()
+                                            ? stripslashes($_REQUEST['session'])
+                                            : $_REQUEST['session'],
+                                            true);
+        }
+        if(isset($_REQUEST['fb_sig_session_key'])){
+            $params['fb_sig_session_key'] = $_REQUEST['fb_sig_session_key'];
+        }
+
         $mod_url = $this->append_kt_query_str($post_link,
                                               http_build_query($params, '', '&'));
         return $mod_url;
@@ -211,9 +226,10 @@ class Kontagent
         if(isset($_GET['kt_st2'])) $params['st2'] = $_GET['kt_st2'];
         if(isset($_GET['kt_st3'])) $params['st3'] = $_GET['kt_st3'];
 
-        if(isset($_REQUEST['ids']))
+        if(isset($_REQUEST['ids'])){
             $params['r'] = join(',' , $_REQUEST['ids']);
-        
+        }
+
         return $this->m_kt_comm_layer->gen_tracking_url('v1', 'ins', $params);
     }
     public function track_invite_sent()

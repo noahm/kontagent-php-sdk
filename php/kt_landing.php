@@ -16,7 +16,9 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
                                  )
                            );
 
-$kt = new Kontagent('tofoo.dyndns.org:8080', 'aaaa');
+$kt = new Kontagent('tofoo.dyndns.org:8080',
+                    'aaaa',
+                    SEND_MSG_VIA_JS);
 
 $uid = null;
 if( isset($_GET['fb_sig_user']) ) $uid = $_GET['fb_sig_user'];
@@ -66,16 +68,25 @@ if(isset($_GET['kt_type']))
     {
     case 'ins':
     {
-        $kt->track_invite_sent();
-        $no_kt_param_url = $kt->stripped_kt_args($kt->get_current_url());
-        $facebook->redirect($no_kt_param_url); 
+        if(!$kt->get_send_msg_from_js()){
+            $kt->track_invite_sent();
+            $no_kt_param_url = $kt->stripped_kt_args($kt->get_current_url());
+            $facebook->redirect($no_kt_param_url); 
+        }else{
+            error_log("time to send out a script message.");///xxx
+            echo "<script>var kt_ins_str='".
+                $kt->gen_tracking_invite_sent_url().
+                "'</script>";
+        }
         break;
     }
     case 'inr':
     {
-        $kt->track_invite_received($uid);
-        $no_kt_param_url = $kt->stripped_kt_args($_SERVER['HTTP_REFERER']);
-        $facebook->redirect($no_kt_param_url);
+        if(!$kt->get_send_msg_from_js()){
+            $kt->track_invite_received($uid);
+            $no_kt_param_url = $kt->stripped_kt_args($_SERVER['HTTP_REFERER']);
+            $facebook->redirect($no_kt_param_url);
+        }
         break;
     }
     

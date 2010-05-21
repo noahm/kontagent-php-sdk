@@ -26,12 +26,12 @@ class KtFacebook extends Facebook
      $http_referer = $_SERVER['HTTP_REFERER'];
       if(preg_match('/http:\/\/apps.facebook.com*/', $http_referer))
       {
-          error_log("calling  redirect on getLoginUrl(array(), false)"); //xxx
+//          error_log("calling  redirect on getLoginUrl(array(), false)"); //xxx
           $this->redirect($this->getLoginUrl(array(), false));
       }
       else
       {
-          error_log("calling  redirect on getLoginUrl(array(), true)"); //xxx
+//          error_log("calling  redirect on getLoginUrl(array(), true)"); //xxx
           $this->redirect($this->getLoginUrl(array()));
       }
 
@@ -43,6 +43,7 @@ class KtFacebook extends Facebook
   public function getSession()
   {
       $session = parent::getSession();
+      
       if(!$session && isset($_REQUEST['fb_sig_session_key']))
       {
           if(!$this->tokenSessionLoaded){
@@ -97,23 +98,23 @@ class KtFacebook extends Facebook
 
   public function redirect($url)
   {
-      error_log("inside redirect: ".$url);//xxx
-      error_log("fb_sig_in_canvas: " . isset($_REQUEST['fb_sig_in_canvas']));//xxx
-      error_log("fb_sig_in_iframe: " . isset($_REQUEST['fb_sig_in_iframe']));//xxx
+//      error_log("inside redirect: ".$url);//xxx
+//      error_log("fb_sig_in_canvas: " . isset($_REQUEST['fb_sig_in_canvas']));//xxx
+//      error_log("fb_sig_in_iframe: " . isset($_REQUEST['fb_sig_in_iframe']));//xxx
       
       if( isset($_REQUEST['fb_sig_in_canvas']) )
       {
-          error_log("in redirect: fb_sig_in_canvas");
+//          error_log("in redirect: fb_sig_in_canvas");
           echo '<fb:redirect url="' . $url . '"/>'; 
       }
       else if( isset($_REQUEST['fb_sig_in_iframe']) )
       {
-          error_log("in redirect: fb_sig_in_iframe");
+//          error_log("in redirect: fb_sig_in_iframe");
           echo "<script type=\"text/javascript\">\ntop.location.href = \"$url\";\n</script>";
       }
       else
       {
-          error_log("neither");//xxx
+//          error_log("neither");//xxx
           header('Location: ' . $url);
       }
       exit;
@@ -134,8 +135,6 @@ class KtFacebook extends Facebook
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
       $server_output = curl_exec($ch);
-      error_log($server_output . " ...............");//xxx
-      error_log(time().".....");//xxx
       curl_close($ch);
       $tmp_arry = split("=", $server_output);
       $access_token = $tmp_arry[1];
