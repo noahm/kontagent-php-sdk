@@ -167,6 +167,7 @@ function http_build_query( formdata, numeric_prefix, arg_separator ) {
 }
 
 ///////////////// Kontagent class /////////////////
+console.log("kontagent.js");//xxx
 
 function Kontagent(kt_host, kt_api_key){
   this.kt_api_key = kt_api_key;
@@ -192,22 +193,25 @@ Kontagent.prototype = {
 	  {
 	    try{
 	      this.kt_send_msg_via_img_tag(kt_ins_str);
-	    }
-	    catch(e){ }
+	    }catch(e){ }
 	    break;
 	  }
 	case 'inr':
 	  {
 	    try{
-
-	    }catch(e){
-
-	    }
+	      //this.kt_send_msg_via_img_tag(kt_inr_str);
+	    }catch(e){ }
 	    break;
 	  }
 	}//switch...
       }//if(qs_dict...
     }//if(qs)...
+
+    try{
+      this.kt_send_msg_via_img_tag(kt_inr_str);
+      console.log("sending:"+kt_inr_str); //xxx
+    }catch(e){
+    }
   },
 
   kt_outbound_msg : function(channel, params)
@@ -237,5 +241,7 @@ Kontagent.prototype = {
   }
 };
 
-var kt = new Kontagent("http://tofoo.dyndns.org:8080" , "bbbb");
-kt.run();
+if(window.KT_API_SERVER && window.KT_API_KEY){
+  var kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
+  kt.run();
+}

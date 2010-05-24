@@ -5,16 +5,28 @@ require_once '../kt/php/kontagent.php';
 require_once '../kt/php/kt_facebook.php';
 require_once '../kt/php/kt_landing.php';
 
+
+$canvas_url = "http://apps.facebook.com/lih_test_lowlevelnew/";
+$canvas_callback_url = FB_CALLBACK_URL;
+
 // Create our Application instance.
 $facebook = new KtFacebook(array('appId'  => '117179248303858',
-                                 'secret' => 'fd819a0c9d76e1b35060df8abdb06fb5',
+                                 'secret' => FB_SECRET,
                                  'cookie' => true,
                                  )
                            );
 
+print_r($_REQUEST);//xxx
+
 // Create a kontagent instance
-$kt = new Kontagent('http://tofoo.dyndns.org:8080', 'aaaa', 'ffff');
-$facebook->fbNativeAppRequireLogin(); //lihchen
+$kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
+$session = $facebook->fbNativeAppRequireLogin(); //lihchen
+
+///////////// test ///////////// 
+$access_token = $facebook->getAccessTokenFromSessionKey($_REQUEST['fb_sig_session_key']);
+error_log("access_token>>>>>>>>>>>>>>".$access_token);//xxx
+//$me_json = $facebook->api('/me', array("access_token"=>$access_token));
+///////////// end:test ///////////// 
 
 // We may or may not have this data based on a $_GET or $_COOKIE based session.
 //
@@ -23,8 +35,7 @@ $facebook->fbNativeAppRequireLogin(); //lihchen
 // if it is still valid until we make an API call using the session. A session
 // can become invalid if it has already expired (should not be getting the
 // session back in this case) or if the user logged out of Facebook.
-$session = $facebook->getSession();
-
+//$session = $facebook->getSession();
 
 $me = null;
 // Session based API call.
@@ -45,25 +56,13 @@ if ($me) {
     $loginUrl = $facebook->getLoginUrl();
 }
 
-//////////////////////////////////////////
-$server_output = $facebook->api(array('method' => 'data.getcookies',
-                                      'name'=>'kt_just_installed',
-                                      'uid' => $uid,
-                                      'access_token'=>$session['access_token']));
-print_r($server_output); //xxx
-//////////////////////////////////////////
-$server_output = $facebook->api(array('method' => 'data.setcookie',
-                                      'name' => 'kt_just_installed',
-                                      'uid' =>$uid,
-                                      'expires' => 1273538806,
-                                      'access_token'=>$session['access_token']));
-/* error_log("expire the cookie: ". $server_output);//xxx */
-                                      
-                                   
-
 
 // This call will always work since we are fetching public data.
 $naitik = $facebook->api('/naitik');
+
+if(isset($_POST["clicked_button"])){
+    error_log("clicked_button");//xxx
+}
 
 ?>
 <!doctype html>
@@ -85,6 +84,8 @@ $naitik = $facebook->api('/naitik');
   </head>
   <body>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
+    <script src="../kt/js/kontagent.js?v=4"></script>
+          
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>
     <a href="<?php echo $logoutUrl; ?>">
@@ -95,6 +96,10 @@ $naitik = $facebook->api('/naitik');
       <img src="http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif">
     </a>
     <?php endif ?>
+
+    <form method="POST" action="<?php echo $canvas_callback_url;?>">
+         <input name="clicked_button" type="submit" value="dashboard.addNews" />
+    </form>
 
     <h3>Session</h3>
     <?php if ($me): ?>
@@ -115,8 +120,6 @@ $naitik = $facebook->api('/naitik');
     <?php echo $naitik['name']; ?>-->
 
 <?php
-$canvas_url = "http://apps.facebook.com/lih_test_lowlevelnew/";
-$canvas_callback_url = "http://tofoo.dyndns.org:8080/kt_fb_testapp/examples/";
 $long_tracking_code = $kt->gen_long_tracking_code();
 $st1 = 'st111'; $st2 = 'st222'; $st3 = 'st333';
 $invite_post_link = $kt->gen_invite_post_link($canvas_callback_url,
@@ -126,6 +129,7 @@ $invite_post_link = $kt->gen_invite_post_link($canvas_callback_url,
 $invite_content_link = $kt->gen_invite_content_link($canvas_url,
                                                     $long_tracking_code,
                                                     'st111', 'st222', 'st333');
+
 ?>
     
 <fb:serverFbml>

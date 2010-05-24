@@ -16,13 +16,16 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
                                  )
                            );
 
-$kt = new Kontagent('tofoo.dyndns.org:8080',
-                    'aaaa',
-                    SEND_MSG_VIA_JS);
+$kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
+
+if(SEND_MSG_VIA_JS){
+    echo "<script>var KT_API_SERVER = '".KT_API_SERVER."';  var KT_API_KEY = '".KT_API_KEY."';</script>";
+}
+
+
 
 $uid = null;
 if( isset($_GET['fb_sig_user']) ) $uid = $_GET['fb_sig_user'];
-
 
 $session = $facebook->getSession();
 
@@ -49,6 +52,7 @@ if($uid){
                                                       'name' => 'kt_just_installed',
                                                       'uid' =>$uid,
                                                       'expires' => time()-345600));
+                $kt_install_param_override = '0';
                 break;
             }
         }
@@ -60,7 +64,7 @@ if($uid){
                 setcookie( $browser_install_cookie_key, 'done' ); 
     }
 }
-
+if(!isset($kt_install_param_override)) $kt_install_param_override = null;
 
 //
 // Track other messages
@@ -84,8 +88,14 @@ if(isset($_GET['kt_type']))
     {
         if(!$kt->get_send_msg_from_js()){
             $kt->track_invite_received($uid);
+            // If it doesn't get rid of the the forward the kt_* parameters, except
+            // for the kt_ut tag, after install, we'll get another inr message.
             $no_kt_param_url = $kt->stripped_kt_args($_SERVER['HTTP_REFERER']);
             $facebook->redirect($no_kt_param_url);
+        }else{
+            echo "<script>var kt_inr_str='".
+                $kt->gen_tracking_invite_click_url($uid, $kt_install_param_override).
+                "'</script>";
         }
         break;
     }

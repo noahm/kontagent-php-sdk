@@ -48,6 +48,15 @@ class KtFacebook extends Facebook
       {
           if(!$this->tokenSessionLoaded){
               $access_token = $this->getAccessTokenFromSessionKey($_REQUEST['fb_sig_session_key']);
+
+              if(!isset($_REQUEST['fb_sig_user'])){
+                  // After the initial invite is clicked. FB forwards to a page where a user can further invite
+                  // more friends via email. When a skip button is clicked. fb_sig_user was not sent back.
+                  error_log($access_token);//xxx
+                  $me_json = $this->api('/me', array("access_token"=>$access_token));
+                  error_log("me_json : " . print_r($me_json, 1));
+              }
+                  
               $session = array('access_token' => $access_token,
                                'uid' => $_REQUEST['fb_sig_user']);
               $this->session = $session;
@@ -58,6 +67,7 @@ class KtFacebook extends Facebook
       }
       return $session;
   }
+
   //
   // Overridden
   //
