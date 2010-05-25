@@ -47,18 +47,22 @@ class KtFacebook extends Facebook
       if(!$session && isset($_REQUEST['fb_sig_session_key']))
       {
           if(!$this->tokenSessionLoaded){
-              $access_token = $this->getAccessTokenFromSessionKey($_REQUEST['fb_sig_session_key']);
+              $oauth_struct = $this->getAccessTokenFromSessionKey($_REQUEST['fb_sig_session_key']);
 
               if(!isset($_REQUEST['fb_sig_user'])){
                   // After the initial invite is clicked. FB forwards to a page where a user can further invite
                   // more friends via email. When a skip button is clicked. fb_sig_user was not sent back.
-                  error_log($access_token);//xxx
-                  $me_json = $this->api('/me', array("access_token"=>$access_token));
-                  error_log("me_json : " . print_r($me_json, 1));
+                  // TODO: the access token returned by getAccessTokenFromSessionKey is incorrect.
+                  $me_json = $this->api('/me', array("access_token"=>$oauth_struct[0]->access_token));
+                  $uid = $me_json['id'];
+              }else{
+                  $uid = $_REQUEST['fb_sig_user'];
               }
                   
-              $session = array('access_token' => $access_token,
-                               'uid' => $_REQUEST['fb_sig_user']);
+              $session = array('access_token' => $oauth_struct[0]->access_token,
+                               'session_key' => $_REQUEST['fb_sig_session_key'],
+                               'expires'=> $oauth_struct[0]->expires,
+                               'uid' => $uid);
               $this->session = $session;
               $this->tokenSessionLoaded = true;
           }else{
@@ -140,14 +144,13 @@ class KtFacebook extends Facebook
                     'client_secret'=>$this->getApiSecret(),
                     'sessions'=>$session_key,
                     );
-      curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/oauth/access_token');
+      curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/oauth/exchange_sessions');
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
       $server_output = curl_exec($ch);
       curl_close($ch);
-      $tmp_arry = split("=", $server_output);
-      $access_token = $tmp_arry[1];
-      return $access_token;
+      $r = json_decode($server_output);
+      return $r;
   }
 }

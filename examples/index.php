@@ -18,15 +18,10 @@ $facebook = new KtFacebook(array('appId'  => '117179248303858',
 
 print_r($_REQUEST);//xxx
 
+
 // Create a kontagent instance
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
 $session = $facebook->fbNativeAppRequireLogin(); //lihchen
-
-///////////// test ///////////// 
-$access_token = $facebook->getAccessTokenFromSessionKey($_REQUEST['fb_sig_session_key']);
-error_log("access_token>>>>>>>>>>>>>>".$access_token);//xxx
-//$me_json = $facebook->api('/me', array("access_token"=>$access_token));
-///////////// end:test ///////////// 
 
 // We may or may not have this data based on a $_GET or $_COOKIE based session.
 //
