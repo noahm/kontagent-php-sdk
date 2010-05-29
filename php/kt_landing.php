@@ -101,7 +101,6 @@ if(isset($_GET['kt_type']))
             $facebook->redirect($no_kt_param_url);
         }else{
             echo "<script>var kt_landing_str='".
-                //$kt->gen_tracking_invite_click_url($uid, $kt_install_param_override).
                 $kt->gen_tracking_invite_click_url($uid).
                 "';</script>";
         }
