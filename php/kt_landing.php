@@ -109,13 +109,17 @@ if(isset($_GET['kt_type']))
     case 'stream':
     {
         if(!$kt->get_send_msg_from_js()){
-            $kt->track_stream_click();
+            $kt->track_stream_click($uid);
         }
         else
         {
-            
+            echo "<script>var kt_landing_str='".
+                $kt->gen_tracking_stream_click_url($uid),
+                "';</script>";
         }
+        break;
     }
+    
     
     }// switch
 }

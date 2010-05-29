@@ -265,11 +265,27 @@ class Kontagent
 
     public function gen_tracking_stream_click_url($recipient_uid)
     {
+        if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ||
+            isset($_REQUEST['session']) ){
+            $installed = 1;
+        }else{
+            $installed = 0;
+        }        
         
+        $params = array('u' => $_GET['kt_ut'],
+                        'i' => $installed);
+        if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
+        if(isset($_GET['kt_st2'])) $params['st2'] = $_GET['kt_st2'];
+        if(isset($_GET['kt_st3'])) $params['st3'] = $_GET['kt_st3'];
+        if(isset($recipient_uid))  $params['r']   = $recipient_uid;
+        $params['tu'] = 'stream';
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'psr', $params);
     }
-    public function track_stream_click()
+
+    public function track_stream_click($recipient_uid)
     {
-        
+        $tracking_url = $this->gen_tracking_stream_click_url($recipient_uid);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 
 }

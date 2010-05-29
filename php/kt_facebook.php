@@ -83,6 +83,14 @@ class KtFacebook extends Facebook
       {
           $currentUrl = $_SERVER['HTTP_REFERER'];
       }
+
+      try{
+          /* If Kontagent is not included, it will still work*/
+          $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
+          $currentUrl = $kt->stripped_kt_args($currentUrl);
+      }catch(Exception $e){
+          
+      }
       
       return $this->getUrl(
           'www',
