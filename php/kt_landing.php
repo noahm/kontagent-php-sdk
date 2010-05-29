@@ -25,17 +25,21 @@ if(SEND_MSG_VIA_JS){
 
 
 $uid = null;
-if( isset($_GET['fb_sig_user']) ) $uid = $_GET['fb_sig_user'];
-
 $session = $facebook->getSession();
+if($session){
+    try{
+        $uid = $session['uid'];
+    } catch (FacebookApiException $e) {
+        error_log($e);
+    }
+}
 
 //
 // Track Install
 //
 if($uid){
     $browser_install_cookie_key = $kt->gen_kt_handled_installed_cookie_key(FB_ID, $uid);
-    if( !isset($_COOKIE[$browser_install_cookie_key]) &&
-        $uid != null ){
+    if( !isset($_COOKIE[$browser_install_cookie_key]) ){
         $fb_cookie_arry = $facebook->api(array('method' => 'data.getcookies',
                                                'name'=>'kt_just_installed',
                                                'uid' => $uid));
@@ -59,9 +63,11 @@ if($uid){
 
         // kt_handle_installed is set to prevent further round
         // trip to facebook to get the fb cookies
-        if( isset($_GET['fb_sig_added']) && $_GET['fb_sig_added'] == 1 )
-            if( !headers_sent() ) 
+        if( $session ){
+            if( !headers_sent() ) {
                 setcookie( $browser_install_cookie_key, 'done' ); 
+            }
+        }
     }
 }
 if(!isset($kt_install_param_override)) $kt_install_param_override = null;
@@ -69,6 +75,7 @@ if(!isset($kt_install_param_override)) $kt_install_param_override = null;
 //
 // Track other messages
 //
+
 if(isset($_GET['kt_type']))
 {
     switch($_GET['kt_type'])
@@ -78,9 +85,9 @@ if(isset($_GET['kt_type']))
         if(!$kt->get_send_msg_from_js()){
             $kt->track_invite_sent();
         }else{
-            echo "<script>var kt_ins_str='".
+            echo "<script>var kt_landing_str='".
                 $kt->gen_tracking_invite_sent_url().
-                "'</script>";
+                "';</script>";
         }
         break;
     }
@@ -93,11 +100,22 @@ if(isset($_GET['kt_type']))
             $no_kt_param_url = $kt->stripped_kt_args($_SERVER['HTTP_REFERER']);
             $facebook->redirect($no_kt_param_url);
         }else{
-            echo "<script>var kt_inr_str='".
-                $kt->gen_tracking_invite_click_url($uid, $kt_install_param_override).
-                "'</script>";
+            echo "<script>var kt_landing_str='".
+                //$kt->gen_tracking_invite_click_url($uid, $kt_install_param_override).
+                $kt->gen_tracking_invite_click_url($uid).
+                "';</script>";
         }
         break;
+    }
+    case 'stream':
+    {
+        if(!$kt->get_send_msg_from_js()){
+            $kt->track_stream_click();
+        }
+        else
+        {
+            
+        }
     }
     
     }// switch

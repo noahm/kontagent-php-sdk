@@ -23,15 +23,13 @@ class KtFacebook extends Facebook
           return $session['uid'];
       }
 
-     $http_referer = $_SERVER['HTTP_REFERER'];
+      $http_referer = $_SERVER['HTTP_REFERER'];
       if(preg_match('/http:\/\/apps.facebook.com*/', $http_referer))
       {
-//          error_log("calling  redirect on getLoginUrl(array(), false)"); //xxx
           $this->redirect($this->getLoginUrl(array(), false));
       }
       else
       {
-//          error_log("calling  redirect on getLoginUrl(array(), true)"); //xxx
           $this->redirect($this->getLoginUrl(array()));
       }
 
@@ -83,15 +81,7 @@ class KtFacebook extends Facebook
       }
       else
       {
-          if( isset($_REQUEST['fb_sig_in_canvas']) ||
-              isset($_REQUEST['fb_sig_in_iframe']) )
-          {
-              $currentUrl = $_SERVER['HTTP_REFERER'];
-          }
-          else
-          {
-              $currentUrl = $this->getCurrentUrl();
-          }
+          $currentUrl = $_SERVER['HTTP_REFERER'];
       }
       
       return $this->getUrl(
@@ -112,26 +102,12 @@ class KtFacebook extends Facebook
 
   public function redirect($url)
   {
-//      error_log("inside redirect: ".$url);//xxx
-//      error_log("fb_sig_in_canvas: " . isset($_REQUEST['fb_sig_in_canvas']));//xxx
-//      error_log("fb_sig_in_iframe: " . isset($_REQUEST['fb_sig_in_iframe']));//xxx
-      
-      if( isset($_REQUEST['fb_sig_in_canvas']) )
-      {
-//          error_log("in redirect: fb_sig_in_canvas");
-          echo '<fb:redirect url="' . $url . '"/>'; 
-      }
-      else if( isset($_REQUEST['fb_sig_in_iframe']) )
-      {
-//          error_log("in redirect: fb_sig_in_iframe");
+      if(!SEND_MSG_VIA_JS){
           echo "<script type=\"text/javascript\">\ntop.location.href = \"$url\";\n</script>";
+          exit;
+      }else{
+          echo "<script>var kt_redirect='".$url."'</script>";
       }
-      else
-      {
-//          error_log("neither");//xxx
-          header('Location: ' . $url);
-      }
-      exit;
   }
 
 

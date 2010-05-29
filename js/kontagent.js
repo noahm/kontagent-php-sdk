@@ -1,3 +1,61 @@
+/*
+ * Generate a random uuid.
+ *
+ * USAGE: Math.uuid(length, radix)
+ *   length - the desired number of characters
+ *   radix  - the number of allowable values for each character.
+ *
+ * EXAMPLES:
+ *   // No arguments  - returns RFC4122, version 4 ID
+ *   >>> Math.uuid()
+ *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
+ *
+ *   // One argument - returns ID of the specified length
+ *   >>> Math.uuid(15)     // 15 character ID (default base=62)
+ *   "VcydxgltxrVZSTV"
+ *
+ *   // Two arguments - returns ID of the specified length, and radix. (Radix must be <= 62)
+ *   >>> Math.uuid(8, 2)  // 8 character ID (base=2)
+ *   "01001010"
+ *   >>> Math.uuid(8, 10) // 8 character ID (base=10)
+ *   "47473046"
+ *   >>> Math.uuid(8, 16) // 8 character ID (base=16)
+ *   "098F4D35"
+ */
+Math.uuid = (function() {
+  // Private array of chars to use
+  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+
+  return function (len, radix) {
+    var chars = CHARS, uuid = [], rnd = Math.random;
+    radix = radix || chars.length;
+
+    if (len) {
+      // Compact form
+      for (var i = 0; i < len; i++) uuid[i] = chars[0 | rnd()*radix];
+    } else {
+      // rfc4122, version 4 form
+      var r;
+
+      // rfc4122 requires these characters
+      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '';
+      uuid[14] = '4';
+
+      // Fill in random data.  At i==19 set the high bits of clock sequence as
+      // per rfc4122, sec. 4.1.5
+      for (var i = 0; i < 36; i++) {
+        if (!uuid[i]) {
+          r = 0 | rnd()*16;
+          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
+        }
+      }
+    }
+
+    var ret = uuid.join('');
+    return ret.substring(0, 32);
+  };
+})();
+
 function urlencode( str ) {
     // http://kevin.vanzonneveld.net
     // +   original by: Philip Peterson
@@ -167,7 +225,6 @@ function http_build_query( formdata, numeric_prefix, arg_separator ) {
 }
 
 ///////////////// Kontagent class /////////////////
-console.log("kontagent.js");//xxx
 
 function Kontagent(kt_host, kt_api_key){
   this.kt_api_key = kt_api_key;
@@ -178,45 +235,19 @@ function Kontagent(kt_host, kt_api_key){
 Kontagent.prototype = {
   run : function()
   {
-    var curr_url = window.location.href;
-    var url_items = curr_url.split("?");
-    var qs = null;
-    if(url_items.length > 1){
-      qs = url_items[1];
+    if(window.kt_landing_str){
+      this.kt_send_msg_via_img_tag(kt_landing_str);
     }
 
-    if(qs){
-      var qs_dict = parse_str(qs);
-      if(qs_dict['kt_type'] != undefined){
-	switch(qs_dict['kt_type']){
-	case 'ins':
-	  {
-	    try{
-	      this.kt_send_msg_via_img_tag(kt_ins_str);
-	    }catch(e){ }
-	    break;
-	  }
-	case 'inr':
-	  {
-	    try{
-	      //this.kt_send_msg_via_img_tag(kt_inr_str);
-	    }catch(e){ }
-	    break;
-	  }
-	}//switch...
-      }//if(qs_dict...
-    }//if(qs)...
-
-    try{
-      this.kt_send_msg_via_img_tag(kt_inr_str);
-      console.log("sending:"+kt_inr_str); //xxx
-    }catch(e){
+    // do we need to redirect?
+    if(window.kt_redirect){
+      top.location.href = kt_redirect;
     }
   },
 
   kt_outbound_msg : function(channel, params)
   {
-    var url_path = this.kt_host + "/api/" + this.version + "/" + this.kt_api_key + "/" + channel + "/?" + http_build_query(params);
+    var url_path = "http://"+this.kt_host + "/api/" + this.version + "/" + this.kt_api_key + "/" + channel + "/?" + http_build_query(params);
     this.kt_send_msg_via_img_tag(url_path);
   },
 
@@ -226,19 +257,39 @@ Kontagent.prototype = {
     img.src = url_path;
   },
 
-  track_invite_sent : function(qs_dict)
+  append_kt_query_str : function(original_url, query_str)
   {
-    var params = {};
-    if(qs_dict['kt_ut'] != undefined)  params['u']   = qs_dict['kt_ut'];
-    if(qs_dict['kt_uid'] != undefined) params['s']   = qs_dict['kt_uid'];
-    if(qs_dict['kt_st1'] != undefined) params['st1'] = qs_dict['kt_st1'];
-    if(qs_dict['kt_st2'] != undefined) params['st2'] = qs_dict['kt_st2'];
-    if(qs_dict['kt_st3'] != undefined) params['st3'] = qs_dict['kt_st3'];
-    if(qs_dict['ids']){
-      params['r'] = qs_dict['ids'].join(',');
+    var position = original_url.indexOf('?');
+    if(position == -1)
+    {
+      return original_url + "?" + query_str;
     }
-    this.kt_outbound_msg('ins', params);
+    else
+    {
+      return original_url + "&" + query_str;
+    }
+  },
+
+  get_session_uid : function()
+  {
+    var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
+    var uid = JSON.parse(parsed_qs['session'])['uid'];
+    return uid;
+  },
+
+  gen_stream_link : function(link, uuid, st1, st2, st3)
+  {
+    var param_array = {kt_type : 'stream',
+		       kt_ut   : String(uuid),
+		       kt_st1  : st1,
+		       kt_st2  : st2,
+		       kt_st3  : st3};
+
+    var query_str = http_build_query(param_array);
+    var mod_link = this.append_kt_query_str(link, query_str);
+    return mod_link;
   }
+
 };
 
 if(window.KT_API_SERVER && window.KT_API_KEY){

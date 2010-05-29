@@ -10,14 +10,11 @@ $canvas_url = "http://apps.facebook.com/lih_test_lowlevelnew/";
 $canvas_callback_url = FB_CALLBACK_URL;
 
 // Create our Application instance.
-$facebook = new KtFacebook(array('appId'  => '117179248303858',
+$facebook = new KtFacebook(array('appId'  => FB_ID,
                                  'secret' => FB_SECRET,
                                  'cookie' => true,
                                  )
                            );
-
-print_r($_REQUEST);//xxx
-
 
 // Create a kontagent instance
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
@@ -30,7 +27,6 @@ $session = $facebook->fbNativeAppRequireLogin(); //lihchen
 // if it is still valid until we make an API call using the session. A session
 // can become invalid if it has already expired (should not be getting the
 // session back in this case) or if the user logged out of Facebook.
-//$session = $facebook->getSession();
 
 $me = null;
 // Session based API call.
@@ -79,7 +75,9 @@ if(isset($_POST["clicked_button"])){
   </head>
   <body>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="../kt/js/kontagent.js?v=4"></script>
+      <script src="../kt/js/kontagent.js?v=18"></script>
+    <script src="../kt/js/kt_facebook.js?v=18"></script>
+          
           
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>
@@ -94,7 +92,8 @@ if(isset($_POST["clicked_button"])){
 
     <form method="POST" action="<?php echo $canvas_callback_url;?>">
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
-    </form>
+         <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
+         </form>
 
     <h3>Session</h3>
     <?php if ($me): ?>
@@ -155,37 +154,49 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
      xfbml  : true  // parse XFBML
    });
 
-    FB.Event.subscribe('auth.login', function(response) {
+
+FB.Event.subscribe('auth.login', function(response) {
         // Reload the application in the logged-in state
             window.top.location = 'http://apps.facebook.com/lih_test_lowlevelnew/';
         });
 
-/* FB.login(function(response) { */
-/*   if (response.session) { */
-/*     // user successfully logged in */
-/*     alert(response.perms); */
-/*   } else { */
-/*     // user cancelled login */
-/*     alert("not logged in !"); */
-/*   } */
-/* }); */
 
-/*    FB.ui( */
-/*    { */
-/*      method: 'stream.publish', */
-/*      message: 'Check out this great app! http://apps.facebook.com/{your_app}', */
-/*    }, */
+function test_js_stream(){
+    FB.ui(
+   {
+     st1 : 'stream_st1',
+     st2 : 'stream_st2',
 
-/*    function(resp) */
-/*    { */
-/*        if(resp && resp.post_id) */
-/*        { */
-/*            alert('Post was publish.'); */
-/*        } */
-/*        else */
-/*        { */
-/*            alert('Post was not publish.'); */
-/*        } */
-/*    } */
-/*   ); */
+     method: 'stream.publish',
+     message: 'Check out this great app!',
+     action_links: [{ text: 'click me', href: '<?php echo FB_CANVAS_URL?>'}],
+     attachment: {
+       name: 'Connect',
+       caption: 'The Facebook Connect JavaScript SDK',
+       description: (
+         'A small JavaScript library that allows you to harness ' +
+         'the power of Facebook, bringing the user\'s identity, ' +
+         'social graph and distribution power to your site.'
+       ),
+      href: '<?php echo FB_CANVAS_URL?>',
+               media: [ {'type' : 'image',
+                         'src':  'http://icanhascheezburger.files.wordpress.com/2009/03/funny-pictures-kitten-finished-his-milk-and-wants-a-cookie.jpg',
+                         'href': '<?php echo FB_CANVAS_URL?>'},
+                        {'type':   'mp3',
+                         'src':    'http://ktsdk.kontagent.com:8080/kt_fb_testapp/examples/jaydiohead.mp3', 
+                         'title':  'optimism',
+                         'artist': 'jaydiohead',
+                         'album':  'jaydiohead' }]
+               }
+   },
+
+   function(resp)
+   {
+       alert("og cb");//xxx
+   }
+  );
+}
+
+
+
 </script>

@@ -239,22 +239,15 @@ class Kontagent
     }
 
     // if recipient_uid is not available, pass in null.
-    public function gen_tracking_invite_click_url($recipient_uid,
-                                                  $installed_override=null)
+    public function gen_tracking_invite_click_url($recipient_uid)
     {
-        error_log("installed_override:".$installed_override);//xxx
-        if(!isset($installed_override)){
-            $installed = 0;
-            if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ){
-                error_log("I shouldn't be here!");//xxx
-                $installed = 1;
-            }
+        if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ||
+            isset($_REQUEST['session']) ){
+            $installed = 1;
         }else{
-            error_log("did I get here?");//xxx
-            $installed = $installed_override;
+            $installed = 0;
         }
-        error_log("installed is set to: " . $installed);//xxx
-        
+            
         $params = array( 'u' => $_GET['kt_ut'],
                          'i' => $installed );
         if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
@@ -262,7 +255,6 @@ class Kontagent
         if(isset($_GET['kt_st3'])) $params['st3'] = $_GET['kt_st3'];
         if(isset($recipient_uid))  $params['r']   = $recipient_uid;
 
-        error_log($this->m_kt_comm_layer->gen_tracking_url('v1', 'inr', $params));//xxx
         return $this->m_kt_comm_layer->gen_tracking_url('v1', 'inr', $params);
     }
     public function track_invite_received($recipient_uid)
@@ -270,4 +262,14 @@ class Kontagent
         $tracking_url = $this->gen_tracking_invite_click_url($recipient_uid);
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
+
+    public function gen_tracking_stream_click_url($recipient_uid)
+    {
+        
+    }
+    public function track_stream_click()
+    {
+        
+    }
+
 }
