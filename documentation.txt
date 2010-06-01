@@ -1,0 +1,268 @@
+Facebook Hacks for canvas apps (FAQs)
+-------------------------------------
+
+- Why am I not getting fb_sig_* parameters anymore?  
+
+  Under the Migrations tab in your facebook app settings page, your
+  NEW SDKs setting's set to Enabled. If it's enabled, you will get the
+  session object via get; otherwise, you will get fb_sig_*
+
+- Why am I not getting the new session object? 
+
+  See the previous question.
+
+
+- Why does Kontagent::gen_invite_post_link() include kt_uid in the
+  invite post link?
+  
+  fb:request-from's post link needs to be callback url if the app is
+  an iframe-based app. Facebook passes all its paramters directly to
+  the callback url in this case instead of the canvas url
+  (http://apps.facebook/com/[your_app]). When FB forwards back to the
+  callback url after invite sent, fb_sig_user is no where to be
+  found. That's why we need to have kt_uid in the invite post's
+  query_string. This is important because kontagent needs to have
+  access to the ids parameter for the r parameter in the ins message.
+
+
+- Why does Kontagent::gen_invite_post_link() include session and
+  fb_sig_session_key in the invite post link?
+
+  Facebook doesn't send any of the fb_sig_* parameter down after an
+  invite is sent. This presents a problem. Inside kt_landing.php,
+  since the session information is missing, it will forward the user
+  back to the login.php url. Consequently, we will miss the recipient
+  uids. To get around it inside the Kontagent::gen_invite_post_link
+  function I grab the fb_sig_session_key and the session parameter if
+  they are present and append them to be part of the post_url, so that
+  when it arrives at the Kontagent::fbNativeAppRequireLogin() call, no
+  redirection will happen.
+
+
+- Why doesn't my stream dialog popup show up?
+ 
+  Chances are that your action links are too long. Firebug gave me
+  this following complaint: "a.parentNode is null." It makes no sense
+  to me, but thru trail and error, I believe that your action link
+  can't be more that 73 to 75 characters long. 
+
+
+- Why can't I use my converted access_token from session_key to make
+  any of the graph api calls?
+
+  Use https://graph.facebook.com/oauth/exchange_sessions instead of
+  https://graph.facebook.com/oauth/access_token to convert from the
+  old fb_sig_session_key to the new access_token. The facebook
+  documentation is a bit inconsistent on this issue. The access_token
+  you get from calling oauth/access_token will only work for the old
+  REST API calls while the access_token from calling
+  oauth/exchange_sessions will work for both the old REST calls and
+  the GRAPH API.
+
+
+- Why does Facebook keeps redirecting users outside of Facebook after
+  login.php with the new permission install page?
+
+  To get around this, you can pass in HTTP_REFERER as the current_url
+  which is passed to the getloginurl() call. In this case HTTP_REFERER
+  should be your canvas url,
+  ie. http://apps.facebook.com/your_canvas_app_name. See
+  KtFacebook::getLoginUrl() in kt_facebook.php for more details.
+
+
+
+Functions that are overridden by Kontagent in KtFacebook
+---------------------------------------------------------
+- getSession()
+  
+  The way the facebook sdk is set up, your app will not be able to get
+  a session unless you forward your user to the login.php page first (
+  See getLoginURL() ). Fortunately, you can convert the old
+  fb_sig_session_key to get all the new session related information. 
+
+- getLoginURL()
+  
+  You might've already noticed that after a user has authorized your
+  app, facebook will redirect your user to the url specified by the
+  next parameter. However, Facebook::getCurrentUrl() returns the
+  callback url; as a result, your user will be directly outside of
+  Facebook. To get around this problem, the overridden getLoginURL()
+  checks to see if the app is a canvas or an iframe app. If so, it
+  will set the next parameter to HTTP_REFERER, which is
+  http://apps.facebook.com/[your_canvas_app].
+ 
+Functions that are added by Kontagent in KtFacebook
+-----------------------------------------------------
+- fbNativeAppRequireLogin()
+
+  It behaves the save as require_login() in the old facebook library.
+
+- redirect()
+
+  It behaves the save as redirect() in the old facebook library.
+  
+- getAccessTokenFromSessionKey()
+      
+  It calls https://graph.facebook.com/oauth/exchange_sessions with
+  fb_sig_session_key to get access_token and other related info. See 
+  http://developers.facebook.com/docs/guides/upgrade for more info.
+
+
+Setup
+------
+0) Copy the entire kt directory to a location that makes sense to you. 
+
+0.1) Edit kt/php/kt_config.php
+     
+    FB_CALLBACK_URL 
+    ---------------
+    Same as your callback URL specified in your facebook app setup page. 
+
+    FB_CANVAS_URL
+    -------------
+    Same as your canvas URL specified in your facebook app setup page.
+
+    FB_ID
+    -----
+    Facebook Application ID. Note that this is not the same as your
+    Facebook API Key.
+
+    FB_SECRET
+    ---------
+    Your App Secret Key.
+
+    KT_API_SERVER
+    -------------
+    Use api.geo.kontagent.net for production and use
+    api.test.kontagent.net for development. If KT_API_SERVER is set to
+    api.test.kontagent.net, you can go to Kontagent.com to check out your
+    outbound messages to Kontagent in real time under the tools/test
+    server page. Please note that our api.test.kontagent.net server is not
+    meant to handle a large volume of traffic. It's meant for you to test
+    out your instrumentation only.
+
+
+    KT_API_KEY
+    ----------
+    You'll get it after you've added an app.
+
+
+    SEND_MSG_VIA_JS 
+    ---------------
+    If it's set to true, it will delegate the sending of Kontagnent
+    messages to your users' browsers. This will free up bandwidth between
+    you server and Kontagent.
+
+1) Add the following require_once after your facebook.php include to
+   your landing page(s) and construct the KtFacebook and the Kontagent
+   object.
+
+    require '[path]/kt_config.php';
+    require '[path]/kontagent.php';
+    require '[path]/kt_facebook.php';
+    require '[path]/kt_landing.php'; 
+
+    $facebook = new KtFacebook(array('appId'  => FB_ID,
+                                     'secret' => FB_SECRET,
+                                     'cookie' => true,
+                                    ));  
+
+    $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
+
+2) Add the following js includes.
+
+    <script src="[path]/kontagent.js"></script>
+    <script src="[path]/kt_facebook.js"></script>
+
+3) require login 
+   
+    To prompt new users the authorization page or to get the session
+    object for returning users, call $facebook->fbNativeAppRequireLogin();
+
+
+Invite Send (ins)
+-----------------
+The url generated by gen_invite_post_link() and
+gen_invite_content_link() are not calls directly to Kontagent. They
+are intermediate links that are intended to be processed by
+kt_landing.php, which then will generate a Kontagent REST call.
+
+1) Generate a tracking code. 
+   $long_tracking_code = $kt->gen_long_tracking_code();
+
+2) Append kt_* related parameters to your invite post link's query
+   string.  Note that $long_tracking_code, st1, st2 and st3 have to
+   match between the gen_invite_post_link and the
+   gen_invite_content_link calls.
+ 
+   $invite_post_link = $kt->gen_invite_post_link($canvas_callback_url,
+                                                 $long_tracking_code,
+                                                 $uid,
+   						 [st1 string],
+ 						 [st2 string],
+						 [st3 string]);
+
+3) Append kt_* related parameters to your invite content links' query string.
+   
+   $invite_content_link = $kt->gen_invite_content_link($canvas_url,
+						       $long_tracking_code,
+                                                       [st1 string],
+						       [st2 string],
+						       [st3 string]);
+
+4) Place the generated links at the right place in your FBML.
+
+<fb:serverFbml>
+<script type="text/fbml">
+<fb:fbml>
+    <fb:request-form
+        method='POST'
+        action='<?php echo $invite_post_link?>'
+        invite='true'
+        type='join my Smiley group'
+        content='Would you like to join my Smiley group? 
+            <fb:req-choice url="<?php echo $invite_content_link?>" label="Yes" />'
+        <fb:multi-friend-selector 
+            actiontext="Invite your friends to join your Smiley group.">
+    </fb:request-form>
+</fb:fbml>
+</script>
+</fb:serverFbml>
+
+
+Invite Click (inr)
+------------------
+Should happen by magic.
+
+
+Install Tracking (apa)
+----------------------
+You'll find post_authorize.php in kt/php/. If you already have a
+post_authorize page prior to instrumenting with Kontagent, you can
+simply include this to the top of your own post_authorize php
+file. Otherwise, you'll need to provide Facebook post_authorize.php as
+your post authorize URL. Once Facebook forwards back to your landing
+page which should already have kt_landing.php include, kt_landing.php
+will send Kontagent an apa message.
+
+Technical Details:
+------------------
+Post_authorize.php first convert the fb_sig_session_key into an
+access_token. With that access_token, it makes a call to
+https://api.facebook.com/method/data.setCookie to set a cookie on
+facebook to give us a hint later that this user just authorized your
+app. The cookie name is kt_just_installed. 
+
+Once FB forwards the user back to your landing page. kt_landing.php
+first will check to see if the user has already installed your app. If
+not, there's no point in determining whether the user has just install
+the app. If so, it will first check a browser(not a facebook cookie)
+to see if we've already checked for the user's install status. If the
+browser cookie is not set, it will then call data.getcookies to see if
+kt_just_installed is set. If it's set, an apa message will be sent to
+Kontagent. The browser cookie is in place to prevent future round trip
+time between Facebook and your app server caused by calling
+data.getcookies per page load.
+
+
+
