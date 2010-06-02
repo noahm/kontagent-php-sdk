@@ -152,6 +152,12 @@ class Kontagent
         
         $this->m_kt_comm_layer = new KtCommLayer($this->m_kt_host, $this->m_kt_port, $this->m_kt_api_key);
     }
+
+    public function gen_tracking_pageview_link($uid)
+    {
+        $params = array('s'=>$uid);
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'pgr', $params);
+    }
     
     public function gen_invite_post_link($post_link, $long_tracking_code,
                                          $sender_uid,

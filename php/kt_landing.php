@@ -18,9 +18,6 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
 
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
 
-if(SEND_MSG_VIA_JS){
-    echo "<script>var SEND_MSG_VIA_JS = true;</script>";
-}
 
 echo "<script>var KT_API_SERVER = '".KT_API_SERVER."';  var KT_API_KEY = '".KT_API_KEY."';</script>";
 
@@ -33,6 +30,14 @@ if($session){
     } catch (FacebookApiException $e) {
         error_log($e);
     }
+}
+
+if(SEND_MSG_VIA_JS){
+    echo "<script>var SEND_MSG_VIA_JS = true;</script>";
+}
+if(KT_AUTO_PAGEVIEW_TRACKING){
+    if($uid)
+        echo "<img src='".$kt->gen_tracking_pageview_link($uid)."' width='0px' height='0px' style='display:none;'/>";
 }
 
 //

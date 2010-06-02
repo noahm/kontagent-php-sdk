@@ -6,4 +6,5 @@ define("FB_SECRET", "fd819a0c9d76e1b35060df8abdb06fb5");
 
 define("KT_API_SERVER", "kthq.dyndns.org:8080");
 define("KT_API_KEY", "aaaa");
+define("KT_AUTO_PAGEVIEW_TRACKING", true); 
 define("SEND_MSG_VIA_JS", true);
