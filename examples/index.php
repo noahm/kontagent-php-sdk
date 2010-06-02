@@ -18,7 +18,8 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
 
 // Create a kontagent instance
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
-$session = $facebook->fbNativeAppRequireLogin(); //lihchen
+$session = $facebook->fbNativeAppRequireLogin(array('req_perms'=>'publish_stream',
+                                                    'display'=>'popup')); //lihchen
 
 // We may or may not have this data based on a $_GET or $_COOKIE based session.
 //
@@ -52,8 +53,37 @@ if ($me) {
 $naitik = $facebook->api('/naitik');
 
 if(isset($_POST["clicked_button"])){
-    error_log("clicked_button");//xxx
+    switch($_POST["clicked_button"])
+    {
+    case "php stream":
+    {
+        $attachment = array(
+            'name' => 'php old REST',
+            'caption' => 'The Facebook REST SDK',
+            'href'=> FB_CANVAS_URL,
+            'description' => 'Post stream via the old rest API.',
+            'media' => array(array('type' => 'image',
+                                   'src'  => 'http://icanhascheezburger.files.wordpress.com/2009/03/funny-pictures-kitten-finished-his-milk-and-wants-a-cookie.jpg',
+                                   'href' => FB_CANVAS_URL)
+                             )
+                            );
+        $message = "Check out this great app! (php)";
+        $action_links = array(array('text'=>'click me', 'href'=>FB_CANVAS_URL));
+
+        $post_id = $facebook->api(array('method'=>'stream.publish',
+                                        'message' => $message,
+                                        'attachment' => $attachment,
+                                        'action_links' => $action_links,
+                                        'st1' => 'st111',
+                                        'st2' => 'st222',
+                                        'st3' => 'st333'
+                                        ));
+        break;
+    }
+    }
+    
 }
+
 
 ?>
 <!doctype html>
@@ -75,8 +105,8 @@ if(isset($_POST["clicked_button"])){
   </head>
   <body>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-      <script src="../kt/js/kontagent.js?v=18"></script>
-    <script src="../kt/js/kt_facebook.js?v=18"></script>
+      <script src="../kt/js/kontagent.js?v=21"></script>
+    <script src="../kt/js/kt_facebook.js?v=21"></script>
           
           
     <h1><a href="">php-sdk</a></h1>
@@ -93,6 +123,7 @@ if(isset($_POST["clicked_button"])){
     <form method="POST" action="<?php echo $canvas_callback_url;?>">
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
          <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
+         <input name="clicked_button" type="submit" value="php stream"/>
          </form>
 
     <h3>Session</h3>
@@ -108,10 +139,6 @@ if(isset($_POST["clicked_button"])){
 <?php else: ?>
     <strong><em>You are not Connected.</em></strong>
     <?php endif ?>
-
-<!--    <h3>Naitik</h3>
-    <img src="https://graph.facebook.com/naitik/picture">
-    <?php echo $naitik['name']; ?>-->
 
 <?php
 $long_tracking_code = $kt->gen_long_tracking_code();
@@ -196,7 +223,6 @@ function test_js_stream(){
    }
   );
 }
-
 
 
 </script>

@@ -19,9 +19,10 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
 
 if(SEND_MSG_VIA_JS){
-    echo "<script>var KT_API_SERVER = '".KT_API_SERVER."';  var KT_API_KEY = '".KT_API_KEY."';</script>";
+    echo "<script>var SEND_MSG_VIA_JS = true;</script>";
 }
 
+echo "<script>var KT_API_SERVER = '".KT_API_SERVER."';  var KT_API_KEY = '".KT_API_KEY."';</script>";
 
 
 $uid = null;

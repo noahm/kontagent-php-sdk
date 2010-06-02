@@ -292,7 +292,7 @@ Kontagent.prototype = {
 
 };
 
-if(window.KT_API_SERVER && window.KT_API_KEY){
+if(window.SEND_MSG_VIA_JS){
   var kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
   kt.run();
 }

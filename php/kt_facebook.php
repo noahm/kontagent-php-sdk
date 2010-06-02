@@ -4,6 +4,16 @@
 
 class KtFacebook extends Facebook
 {
+    public function __construct($config) {
+        parent::__construct($config);
+        $this->kt = null;
+        try{
+            /* If Kontagent is not included, it will still work*/
+            $this->kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
+        }catch(Exception $e){
+            
+        }
+    }
 
     /**
      * Session is not available. However, we can still get the access_token
@@ -34,6 +44,83 @@ class KtFacebook extends Facebook
         }
     }
 
+    //
+    // Overridden
+    //
+    protected function _restserver($params){
+        $session = $this->getSession();
+        if($session){
+            if( isset($params['method']) && $params['method'] == 'stream.publish' ){
+                $method_type = 'stream.publish';
+                $uuid = $this->kt->gen_long_tracking_code();
+                if(isset($params['st1']))
+                    $st1 = $params['st1'];
+                else
+                    $st1 = null;
+                if(isset($params['st2']))
+                    $st2 = $params['st2'];
+                else
+                    $st2 = null;
+                if(isset($params['st3']))
+                    $st3 = $params['st3'];
+                else
+                    $st3 = null;
+
+                // href
+                if(isset($params['attachment']) && isset($params['attachment']['href'] )){
+                    $params['attachment']['href'] = $this->kt->gen_stream_link($params['attachment']['href'],
+                                                                               $uuid, $st1, $st2, $st3);
+                    //media
+                    if(isset($params['attachment']['media'])){
+                        $media_list = &$params['attachment']['media'];
+                        $len = sizeof($media_list);
+                        for($i = 0; $i < $len; $i++){
+                            $curr_media = &$media_list[$i];
+                            if($curr_media['type'] == 'image'){
+                                $curr_media['href'] = $this->kt->gen_stream_link($curr_media['href'], $uuid, $st1, $st2, $st3);
+                            }else if($curr_media['type'] == 'mp3'){
+                                $curr_media['mp3'] = $this->kt->gen_stream_link($curr_media['src'], $uuid, $st1, $st2, $st3);
+                            }else if($curr_media[''] == 'flash'){
+                                $curr_media['flash'] = $this->kt->gen_stream_link($curr_media['src'], $uuid, $st1, $st2, $st3);
+                            }
+                        }// for
+                    }// if(isset($params['attachment']['media']))
+                }
+
+                // action_links
+                if(isset($params['action_links'])){
+                    $action_links_list = &$params['action_links'];
+                    $action_links_list_len = sizeof($action_links_list);
+                    for($i = 0; $i < $action_links_list_len; $i++){
+                        $curr_action_link = &$action_links_list[$i];
+                        $curr_action_link['href'] = $this->kt->gen_stream_link($curr_action_link['href'],
+                                                                               $uuid, $st1, $st2, $st3);
+                    }
+                }
+            }
+        }// if($session){
+
+        $r = parent::_restserver($params);
+        
+        if(isset($method_type))
+        {
+            switch($method_type){
+            case 'stream.publish':
+            {
+                if(!$this->kt->get_send_msg_from_js()){
+                    $this->kt->track_stream_send($session['uid'], $uuid, $st1, $st2, $st3);
+                }else{
+                    echo "<script>var kt_landing_str='".
+                        $this->kt->gen_tracking_stream_send_url($session['uid'], $uuid, $st1, $st2, $st3).
+                        "';</script>";
+                }
+                break;
+            }
+            }
+        }
+        return $r;
+    }
+    
     //
     // Overridden
     //
@@ -83,14 +170,10 @@ class KtFacebook extends Facebook
             $currentUrl = $_SERVER['HTTP_REFERER'];
         }
 
-        try{
-            /* If Kontagent is not included, it will still work*/
-            $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
+        if($this->kt){
             $currentUrl = $kt->stripped_kt_args($currentUrl);
-        }catch(Exception $e){
-          
         }
-      
+
         return $this->getUrl(
             'www',
             'login.php',
@@ -106,7 +189,6 @@ class KtFacebook extends Facebook
                               ), $params)
                              );
     }
-
     public function redirect($url)
     {
         if(!SEND_MSG_VIA_JS){

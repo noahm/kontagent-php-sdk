@@ -263,6 +263,34 @@ class Kontagent
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 
+    public function gen_stream_link($link, $uuid, $st1=null, $st2=null, $st3=null)
+    {
+        $params = array('kt_type' => 'stream',
+                        'kt_ut'   => $uuid,
+                        'kt_st1'  => $st1,
+                        'kt_st2'  => $st2,
+                        'kt_st3'  => $st3);
+        $mod_url = $this->append_kt_query_str($link,
+                                              http_build_query($params, '', '&'));
+        return $mod_url;
+    }
+    public function gen_tracking_stream_send_url($sender_id, $uuid, $st1=null, $st2=null, $st3=null)
+    {
+        $params = array('tu' => 'stream',
+                        'u' => $uuid,
+                        's' => $sender_id,
+                        );
+        if(isset($st1)) $params['st1'] = $st1;
+        if(isset($st2)) $params['st2'] = $st2;
+        if(isset($st3)) $params['st3'] = $st3;
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'pst', $params);
+    }
+    public function track_stream_send($sender_id, $uuid, $st1=null, $st2=null, $st3=null)
+    {
+        $tracking_url = $this->gen_tracking_stream_send_url($sender_id, $uuid, $st1, $st2, $st3);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+
     public function gen_tracking_stream_click_url($recipient_uid)
     {
         if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ||
