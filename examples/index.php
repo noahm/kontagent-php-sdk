@@ -17,8 +17,8 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
                            );
 
 // Create a kontagent instance
-$kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
-$session = $facebook->fbNativeAppRequireLogin(array('req_perms'=>'publish_stream',
+$kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
+$session = $facebook->fbNativeAppRequireLogin(array('req_perms'=>'publish_stream,user_birthday,user_relationships',
                                                     'display'=>'popup')); //lihchen
 
 // We may or may not have this data based on a $_GET or $_COOKIE based session.
@@ -105,8 +105,8 @@ if(isset($_POST["clicked_button"])){
   </head>
   <body>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-      <script src="../kt/js/kontagent.js?v=21"></script>
-    <script src="../kt/js/kt_facebook.js?v=21"></script>
+      <script src="../kt/js/kontagent.js?v=23"></script>
+    <script src="../kt/js/kt_facebook.js?v=23"></script>
           
           
     <h1><a href="">php-sdk</a></h1>
@@ -124,6 +124,8 @@ if(isset($_POST["clicked_button"])){
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
          <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
          <input name="clicked_button" type="submit" value="php stream"/>
+         <input name="clicked_button" type="button" value="js setcookie" onclick="test_js_data_setcookie()"/>
+         <input name="clicked_button" type="button" value="js getcookie" onclick="test_js_data_getcookie()"/>
          </form>
 
     <h3>Session</h3>
@@ -176,10 +178,17 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
 
   
 <script>
-  FB.init({
+     FB.init({
      appId  : '117179248303858',
-     xfbml  : true  // parse XFBML
-   });
+     xfbml  : true,  // parse XFBML
+     session : SESSION
+  });
+
+     FB.init({
+     appId  : '117179248303858',
+     xfbml  : true,  // parse XFBML
+     session : SESSION
+  });
 
 
 FB.Event.subscribe('auth.login', function(response) {
@@ -187,6 +196,34 @@ FB.Event.subscribe('auth.login', function(response) {
             window.top.location = 'http://apps.facebook.com/lih_test_lowlevelnew/';
         });
 
+
+function test_js_data_getcookie(){
+    FB.api(
+        {
+          method: 'data.getCookies',
+          name : 'kt_test_cookie',
+          uid  : FB.getSession().uid
+        },
+        function(response){
+            console.log(response);//xxxx
+        }
+           );
+}
+
+function test_js_data_setcookie(){
+
+    FB.api(
+        {
+          method: 'data.setCookie',
+          name: 'kt_test_cookie',
+          uid : FB.getSession().uid,
+          value : 'testing cookie'
+        },
+        function(response){
+            console.log(response); 
+        }
+           );
+}
 
 function test_js_stream(){
     FB.ui(

@@ -30,7 +30,7 @@ class KtFacebook extends Facebook
     {
         $session = $this->getSession();
         if($session){
-            return $session['uid'];
+            return $session;
         }
 
         $http_referer = $_SERVER['HTTP_REFERER'];
@@ -171,7 +171,7 @@ class KtFacebook extends Facebook
         }
 
         if($this->kt){
-            $currentUrl = $kt->stripped_kt_args($currentUrl);
+            $currentUrl = $this->kt->stripped_kt_args($currentUrl);
         }
 
         return $this->getUrl(

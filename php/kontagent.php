@@ -43,7 +43,11 @@ class Kontagent
     {
         return 'kt_handled_installed_'.$fb_api_key."_".$uid;
     }
-        
+    public function gen_kt_capture_user_info_key($fb_api_key, $uid)
+    {
+        return 'kt_capture_user_info_'.$fb_api_key."_".$uid;
+    }
+    
     public function gen_long_tracking_code()
     {
         return substr(uniqid(rand()), -16);
@@ -158,7 +162,33 @@ class Kontagent
         $params = array('s'=>$uid);
         return $this->m_kt_comm_layer->gen_tracking_url('v1', 'pgr', $params);
     }
-    
+
+    public function gen_tracking_user_info_link($uid, $user_info_json, $friends_info_json)
+    {
+        $params = array('s'=> $uid);
+        if(isset($user_info_json['gender'])){
+            $params['g'] = urlencode(strtoupper($user_info_json['gender']));
+        }
+        if(isset($user_info_json['birthday'])){
+            $birthday_components=split("/", $user_info_json['birthday']);
+            if(sizeof($birthday_components) == 3)
+                $params['b'] = urlencode(trim($birthday_components[2]));
+            else
+                $params['b'] = urlencode('');
+        }
+        if(isset($friends_info_json)){
+            if(isset($friends_info_json['data'])){
+                $params['f'] = sizeof($friends_info_json['data']);
+            }
+        }
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'cpu', $params);
+    }
+    public function track_user_info($uid, $user_info_json, $friends_info_json)
+    {
+        $tracking_url = $this->gen_tracking_user_info_link($uid, $user_info_json, $friends_info_json);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+
     public function gen_invite_post_link($post_link, $long_tracking_code,
                                          $sender_uid,
                                          $st1=null, $st2=null, $st3=null)

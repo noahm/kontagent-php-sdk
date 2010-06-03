@@ -1,3 +1,28 @@
+function setCookie(name,value,days) {
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires = "; expires="+date.toGMTString();
+	}
+	else var expires = "";
+	document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function getCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
+
+function deleteCookie(name) {
+	setCookie(name,"",-1);
+}
+
 /*
  * Generate a random uuid.
  *
@@ -235,6 +260,13 @@ function Kontagent(kt_host, kt_api_key){
 Kontagent.prototype = {
   run : function()
   {
+    // capture User Info
+    var user_info_cookie_key = this.gen_kt_capture_user_info_key(FB_ID, SESSION['uid']);
+    if(!getCookie(user_info_cookie_key)){
+      setCookie(user_info_cookie_key, 1, 14);
+      this.track_user_info();
+    }
+
     if(window.kt_landing_str){
       this.kt_send_msg_via_img_tag(kt_landing_str);
     }
@@ -245,8 +277,58 @@ Kontagent.prototype = {
     }
   },
 
+  gen_kt_capture_user_info_key : function(app_id, uid)
+  {
+    return 'kt_capture_user_info_'+app_id+"_"+uid;
+  },
+
+  track_user_info : function()
+  {
+    FB.init({ appId   : FB_ID,
+	      xfbml   : true ,
+	      session : SESSION
+	    });
+    var me_json = null;
+    var me_friends_json = null;
+    var this_obj = this;
+    FB.api("/me",
+	   function(response){
+	     me_json = response;
+	     if( me_json != null && me_friends_json != null){
+	       this_obj.track_user_info_impl(me_json, me_friends_json);
+	     }
+	   }
+	  );
+    FB.api("/me/friends",
+	   function(response){
+	     me_friends_json = response;
+	     if( me_json != null && me_friends_json != null){
+	       this_obj.track_user_info_impl(me_json, me_friends_json);
+	     }
+	   });
+  },
+  track_user_info_impl : function(user_info, user_friends_info)
+  {
+    var params = { s : user_info['id']};
+    if( user_info['gender'] != undefined){
+      params['g'] = urlencode(user_info['gender'].toUpperCase());
+    }
+    if( user_info['birthday'] != undefined){
+      var birthday_components = user_info['birthday'].split('/');
+      if(birthday_components.length == 3)
+	params['b'] = urlencode(birthday_components[2]);
+    }
+    if( user_friends_info['data'] != undefined ){
+      params['f'] = user_friends_info['data'].length;
+    }
+    this.kt_outbound_msg('cpu', params);
+  },
+
+
   kt_outbound_msg : function(channel, params)
   {
+    var timestamp = Date.parse((new Date()).toUTCString().slice(0, -4))/1000;
+    params['ts'] = timestamp;
     var url_path = "http://"+this.kt_host + "/api/" + this.version + "/" + this.kt_api_key + "/" + channel + "/?" + http_build_query(params);
     this.kt_send_msg_via_img_tag(url_path);
   },

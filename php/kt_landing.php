@@ -33,17 +33,21 @@ if($session){
 }
 
 if(SEND_MSG_VIA_JS){
-    echo "<script>var SEND_MSG_VIA_JS = true;</script>";
+    echo "<script>var SEND_MSG_VIA_JS = true; var FB_ID='".FB_ID."'</script>";
+    if($uid){
+        echo "<script>var SESSION = ".json_encode($session).";</script>";
+    }
 }
+
 if(KT_AUTO_PAGEVIEW_TRACKING){
     if($uid)
         echo "<img src='".$kt->gen_tracking_pageview_link($uid)."' width='0px' height='0px' style='display:none;'/>";
 }
 
-//
-// Track Install
-//
 if($uid){
+    //
+    // Track Install
+    //
     $browser_install_cookie_key = $kt->gen_kt_handled_installed_cookie_key(FB_ID, $uid);
     if( !isset($_COOKIE[$browser_install_cookie_key]) ){
         $fb_cookie_arry = $facebook->api(array('method' => 'data.getcookies',
@@ -72,6 +76,22 @@ if($uid){
         if( $session ){
             if( !headers_sent() ) {
                 setcookie( $browser_install_cookie_key, 'done' ); 
+            }
+        }
+    }
+
+    //
+    //Acquire User Info
+    //
+    if(!SEND_MSG_VIA_JS){
+        $capture_user_info_key = $kt->gen_kt_capture_user_info_key(FB_ID, $uid);
+        if(!isset($_COOKIE[$capture_user_info_key]))
+        {
+            $user_info = $facebook->api('/me');
+            $friends_info = $facebook->api('/me/friends');
+            $kt->track_user_info($uid, $user_info, $friends_info);
+            if( !headers_sent() ){
+                setcookie( $capture_user_info_key, 'done', time()+1209600); // 2 weeks
             }
         }
     }
