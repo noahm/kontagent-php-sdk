@@ -39,13 +39,14 @@ Facebook Hacks for canvas apps (FAQs)
   redirection will happen.
 
 
-- Why doesn't my stream dialog popup show up?
- 
-  Chances are that your action links are too long. Firebug gave me
-  this following complaint: "a.parentNode is null." It makes no sense
-  to me, but thru trail and error, I believe that your action link
-  can't be more that 73 to 75 characters long. 
+- Why doesn't my stream dialog render properly via calling FB.ui?
 
+  Chances are that you are passing in a fair amount of data into the
+ js call. The js library switches to post if your data is beyond a
+ certain size. However, when your parameters are being sent to
+ Facebook, the library doesn't bother to json_encode them. 
+ Read:http://github.com/facebook/connect-js/issues#issue/65
+ Simply including kt_facebook.js fixes the problem.  
 
 - Why can't I use my converted access_token from session_key to make
   any of the graph api calls?
@@ -169,7 +170,7 @@ Setup
 
     $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, 'ffff');
 
-2) Add the following js includes.
+2) Add the following js includes after the facebook JS SDK include
 
     <script src="[path]/kontagent.js"></script>
     <script src="[path]/kt_facebook.js"></script>
@@ -232,7 +233,9 @@ kt_landing.php, which then will generate a Kontagent REST call.
 
 Invite Click (inr)
 ------------------
-Should happen by magic.
+Handles by kt_landing.php. If SEND_MSG_VIA_JS is true in
+kt_config.php, kontagent.js will handle the sending of the kontagent
+message.
 
 
 Install Tracking (apa)
@@ -245,13 +248,61 @@ your post authorize URL. Once Facebook forwards back to your landing
 page which should already have kt_landing.php include, kt_landing.php
 will send Kontagent an apa message.
 
+
+
+Stream Send via the new Javascript SDK (pst?tu=stream)
+------------------------------------------------------
+1) Make sure that you have the following js files included in the
+order that's shown after the Facebook Javascript include.
+
+    <script src="[path]/kontagent.js"></script>
+    <script src="[path]/kt_facebook.js"></script>
+
+2) If you are supplying st1, st2, and st3, you will need to pass those
+in to the FB.ui call. Inside kt_facebook.js, FB.ui is overridden via
+prototype. In a nutshell, it will generate a uuid, append all the
+necessary kt parameters to all the href attributes. It will also
+intercept the callback function and send a pst message if a stream is
+actually published
+
+   FB.ui(
+   {
+     st1 : 'stream_st1',
+     st2 : 'stream_st2',
+     st3 : 'stream_st3', 
+     method : 'stream.publish',
+     ...
+   });
+
+
+Stream Send via the new Php SDK (pst?tu=stream)
+-----------------------------------------------
+Just pass in st1, st2, st3 strings if you pass to the api call.
+
+$post_id = $facebook->api(array('method'=>'stream.publish',
+     	                        'message' => $message,
+                                'attachment' => $attachment,
+                                'action_links' => $action_links,
+                                'st1' => 'st111',
+                                'st2' => 'st222',
+                                'st3' => 'st333'));
+
+
+Stream Click
+------------
+Handles by kt_landing.php. If SEND_MSG_VIA_JS is true in
+kt_config.php, kontagent.js will handle the sending of the kontagent
+message.
+
+
+
 Technical Details:
 ------------------
 Post_authorize.php first convert the fb_sig_session_key into an
-access_token. With that access_token, it makes a call to
-https://api.facebook.com/method/data.setCookie to set a cookie on
-facebook to give us a hint later that this user just authorized your
-app. The cookie name is kt_just_installed. 
+access_token if the old sdk is used. With that access_token, it makes
+a call to https://api.facebook.com/method/data.setCookie to set a
+cookie on facebook to give us a hint later that this user just
+authorized your app. The cookie name is kt_just_installed.
 
 Once FB forwards the user back to your landing page. kt_landing.php
 first will check to see if the user has already installed your app. If

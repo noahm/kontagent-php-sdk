@@ -1,3 +1,19 @@
+//
+// Attempt to fix a bug where if you pass in a large amount of data in FB.ui,
+// it will switch to using POST. However, it fails to json encode the parameters
+// properly.
+//
+var origPostTarget = FB.Content.postTarget;
+FB.Content.postTarget = function(opts) {
+  FB.Array.forEach(opts.params, function(val, key) {
+    if (typeof val == "object" || typeof val == "array") {
+      opts.params[key] = FB.JSON.stringify(val);
+    }
+  });
+  origPostTarget(opts);
+};
+
+
 if(window.KT_API_SERVER && window.KT_API_KEY)
 {
   var KT_FB = {};
@@ -38,11 +54,11 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
         var action_links_list_len = action_links_list.length;
         for(var i = 0; i < action_links_list_len; i++){
 	  var curr_action_link = action_links_list[i];
-	  //curr_action_link['href'] = KT_FB.kt.gen_stream_link(curr_action_link['href'], uuid, st1, st2, st3);
+	  curr_action_link['href'] = KT_FB.kt.gen_stream_link(curr_action_link['href'], uuid, st1, st2, st3);
         }
       }
 
-      if(cb!=undefined){
+      if(cb!=undefined || cb != null){
 	var kt_cb = function(resp){
 	  if(resp && resp.post_id){
 	    // send a pst stream msg.
@@ -53,14 +69,20 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
 	  }
 	  cb(resp); //call the original callback function
 	};
+      }else{
+	var kt_cb = function(resp){
+	  if(resp && resp.post_id){
+	    // send a pst stream msg.
+	    KT_FB.kt.kt_outbound_msg('pst',
+				     {tu : 'stream', u : uuid, s : uid,
+				      st1 : st1, st2 : st2, st3 : st3}
+				    );
+	  }
+	};
       }
-    }
-
-    if(cb == undefined || cb == null)
-      KT_FB.ui(params, cb);
-    else
-      KT_FB.ui(params, cb);
-  };
+    }//if(params['method'] != undefined...
+    KT_FB.ui(params, kt_cb);
+  };//FB.ui = function...
 }
 
 

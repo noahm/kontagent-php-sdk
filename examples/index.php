@@ -69,7 +69,6 @@ if(isset($_POST["clicked_button"])){
                             );
         $message = "Check out this great app! (php)";
         $action_links = array(array('text'=>'click me', 'href'=>FB_CANVAS_URL));
-
         $post_id = $facebook->api(array('method'=>'stream.publish',
                                         'message' => $message,
                                         'attachment' => $attachment,
@@ -104,10 +103,10 @@ if(isset($_POST["clicked_button"])){
     </style>
   </head>
   <body>
+    <div id="fb-root"></div>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-      <script src="../kt/js/kontagent.js?v=23"></script>
-    <script src="../kt/js/kt_facebook.js?v=23"></script>
-          
+    <script src="../kt/js/kontagent.js?v=30"></script>
+    <script src="../kt/js/kt_facebook.js?v=30"></script>
           
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>
@@ -184,17 +183,6 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
      session : SESSION
   });
 
-     FB.init({
-     appId  : '117179248303858',
-     xfbml  : true,  // parse XFBML
-     session : SESSION
-  });
-
-
-FB.Event.subscribe('auth.login', function(response) {
-        // Reload the application in the logged-in state
-            window.top.location = 'http://apps.facebook.com/lih_test_lowlevelnew/';
-        });
 
 
 function test_js_data_getcookie(){
@@ -232,7 +220,7 @@ function test_js_stream(){
      st2 : 'stream_st2',
 
      method: 'stream.publish',
-     message: 'Check out this great app!',
+     message: 'Check out this great app!!',
      action_links: [{ text: 'click me', href: '<?php echo FB_CANVAS_URL?>'}],
      attachment: {
        name: 'Connect',
@@ -243,21 +231,21 @@ function test_js_stream(){
          'social graph and distribution power to your site.'
        ),
       href: '<?php echo FB_CANVAS_URL?>',
-               media: [ {'type' : 'image',
-                         'src':  'http://icanhascheezburger.files.wordpress.com/2009/03/funny-pictures-kitten-finished-his-milk-and-wants-a-cookie.jpg',
-                         'href': '<?php echo FB_CANVAS_URL?>'},
-                        {'type':   'mp3',
-                         'src':    'http://ktsdk.kontagent.com:8080/kt_fb_testapp/examples/jaydiohead.mp3', 
-                         'title':  'optimism',
-                         'artist': 'jaydiohead',
-                         'album':  'jaydiohead' }]
+               media: [ {type : 'image',
+                         src:  'http://icanhascheezburger.files.wordpress.com/2009/03/funny-pictures-kitten-finished-his-milk-and-wants-a-cookie.jpg',
+                         href: '<?php echo FB_CANVAS_URL?>'},
+                        {type:   'mp3',
+                         src:    'http://ktsdk.kontagent.com:8080/kt_fb_testapp/examples/jaydiohead.mp3', 
+                         title:  'optimism',
+                         artist: 'jaydiohead',
+                         album:  'jaydiohead' }]
                }
-   },
-
-   function(resp)
-   {
-       alert("og cb");//xxx
    }
+/*    , */
+/*    function(resp) */
+/*    { */
+/*        console.log("og cb");//xxx */
+/*    } */
   );
 }
 
