@@ -135,10 +135,10 @@ Setup
     KT_API_SERVER
     -------------
     Use api.geo.kontagent.net for production and use
-    api.test.kontagent.net for development. If KT_API_SERVER is set to
-    api.test.kontagent.net, you can go to Kontagent.com to check out your
+    test-server.kontagent.com for development. If KT_API_SERVER is set to
+    test-server.kontagent.com, you can go to Kontagent.com to check out your
     outbound messages to Kontagent in real time under the tools/test
-    server page. Please note that our api.test.kontagent.net server is not
+    server page. Please note that our test-server.kontagent.com server is not
     meant to handle a large volume of traffic. It's meant for you to test
     out your instrumentation only.
 
