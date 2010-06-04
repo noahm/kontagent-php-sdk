@@ -34,6 +34,17 @@ class Kontagent
         }
     }
 
+    private function is_app_authorized()
+    {
+        if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ||
+            isset($_REQUEST['session']) ){
+            $r = 1;
+        }else{
+            $r = 0;
+        }        
+        return $r;
+    }
+    
     public function get_send_msg_from_js()
     {
         return $this->m_send_msg_from_js;
@@ -78,6 +89,10 @@ class Kontagent
                 $r.= dechex(rand(0, 15));
             }
         }
+
+        // kt_short_tag is used in stripped_kt_args().
+        global $kt_short_tag;
+        $kt_short_tag = $r;
         return $r;
     }
 
@@ -103,7 +118,7 @@ class Kontagent
         foreach($_GET as $arg => $val)
         {
             if(preg_match('/kt_*/',  $arg))
-                if($arg != 'kt_ut' && $arg != 'kt_sut') 
+                if($arg != 'kt_ut') 
                     continue;
             else
             {
@@ -111,6 +126,12 @@ class Kontagent
             }
         }
 
+        // kt_short_tag is set in gen_short_tracking_code().
+        global $kt_short_tag;
+        if(isset($kt_short_tag)){
+            $params['kt_sut'] = $kt_short_tag;
+        }
+        
         $r_url = $parsed_url_arry['scheme']."://".$parsed_url_arry['host'];
         if( isset($parsed_url_arry['port']) )
         {
@@ -277,13 +298,8 @@ class Kontagent
     // if recipient_uid is not available, pass in null.
     public function gen_tracking_invite_click_url($recipient_uid)
     {
-        if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ||
-            isset($_REQUEST['session']) ){
-            $installed = 1;
-        }else{
-            $installed = 0;
-        }
-            
+        $installed = $this->is_app_authorized();
+
         $params = array( 'u' => $_GET['kt_ut'],
                          'i' => $installed );
         if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
@@ -329,12 +345,7 @@ class Kontagent
 
     public function gen_tracking_stream_click_url($recipient_uid)
     {
-        if( isset($_REQUEST['fb_sig_added']) && $_REQUEST['fb_sig_added'] == 1 ||
-            isset($_REQUEST['session']) ){
-            $installed = 1;
-        }else{
-            $installed = 0;
-        }        
+        $installed = $this->is_app_authorized();
         
         $params = array('u' => $_GET['kt_ut'],
                         'i' => $installed);
@@ -349,6 +360,26 @@ class Kontagent
     public function track_stream_click($recipient_uid)
     {
         $tracking_url = $this->gen_tracking_stream_click_url($recipient_uid);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+
+    public function gen_tracking_ucc_click_url($recipient_uid, $short_tag)
+    {
+        $installed = $this->is_app_authorized();
+
+        $params = array('tu' => $_GET['kt_type'],
+                        'i'  => $installed,
+                        's' => $recipient_uid);
+        if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
+        if(isset($_GET['kt_st2'])) $params['st2'] = $_GET['kt_st2'];
+        if(isset($_GET['kt_st3'])) $params['st3'] = $_GET['kt_st3'];
+
+        $params['su'] = $short_tag;
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'ucc', $params);
+    }
+    public function track_ucc_click($recipient_uid, $short_tag)
+    {
+        $tracking_url = $this->gen_tracking_ucc_click_url($recipient_uid, $short_tag);
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 

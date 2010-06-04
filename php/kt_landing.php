@@ -140,12 +140,25 @@ if(isset($_GET['kt_type']))
         else
         {
             echo "<script>var kt_landing_str='".
-                $kt->gen_tracking_stream_click_url($uid),
+                $kt->gen_tracking_stream_click_url($uid).
                 "';</script>";
         }
         break;
     }
-    
+    case 'ad':
+    case 'partner':
+    {
+        $short_tag = $kt->gen_short_tracking_code();
+        if(!$kt->get_send_msg_from_js()){
+            $kt->track_ucc_click($uid, $short_tag);
+        }
+        else{
+            echo "<script>var kt_landing_str='".
+                $kt->gen_tracking_ucc_click_url($uid, $short_tag).
+                "';</script>";
+        }
+        break;
+    }
     
     }// switch
 }

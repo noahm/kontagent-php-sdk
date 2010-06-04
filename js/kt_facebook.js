@@ -19,6 +19,12 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
   var KT_FB = {};
   KT_FB.ui = FB.ui;
   KT_FB.kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
+  KT_FB.prototype = {
+    gen_long_tracking_tag : function()
+    {
+      return Math.uuid().substring(0,16);
+    }
+  };
 
   FB.ui = function(params, cb){
     var uid = KT_FB.kt.get_session_uid();

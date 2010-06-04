@@ -261,10 +261,12 @@ Kontagent.prototype = {
   run : function()
   {
     // capture User Info
-    var user_info_cookie_key = this.gen_kt_capture_user_info_key(FB_ID, SESSION['uid']);
-    if(!getCookie(user_info_cookie_key)){
-      setCookie(user_info_cookie_key, 1, 14);
-      this.track_user_info();
+    if(window.SESSION){
+      var user_info_cookie_key = this.gen_kt_capture_user_info_key(FB_ID, SESSION['uid']);
+      if(!getCookie(user_info_cookie_key)){
+	setCookie(user_info_cookie_key, 1, 14);
+	this.track_user_info();
+      }
     }
 
     if(window.kt_landing_str){
@@ -284,6 +286,7 @@ Kontagent.prototype = {
 
   track_user_info : function()
   {
+    if( !window.SESSION ) return;
     FB.init({ appId   : FB_ID,
 	      xfbml   : true ,
 	      session : SESSION

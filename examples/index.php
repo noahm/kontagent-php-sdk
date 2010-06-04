@@ -105,8 +105,8 @@ if(isset($_POST["clicked_button"])){
   <body>
     <div id="fb-root"></div>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="../kt/js/kontagent.js?v=30"></script>
-    <script src="../kt/js/kt_facebook.js?v=30"></script>
+    <script src="../kt/js/kontagent.js?v=31"></script>
+    <script src="../kt/js/kt_facebook.js?v=31"></script>
           
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>
@@ -177,12 +177,19 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
 
   
 <script>
-     FB.init({
-     appId  : '117179248303858',
-     xfbml  : true,  // parse XFBML
-     session : SESSION
-  });
-
+  if(window.SESSION)
+  {
+      FB.init({
+            appId  : '117179248303858',
+            xfbml  : true,  // parse XFBML
+            session : SESSION
+             });
+  }else{
+      FB.init({
+            appId  : '117179248303858',
+            xfbml  : true,  // parse XFBML
+             });
+  }
 
 
 function test_js_data_getcookie(){

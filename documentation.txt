@@ -71,6 +71,19 @@ Facebook Hacks for canvas apps (FAQs)
   KtFacebook::getLoginUrl() in kt_facebook.php for more details.
 
 
+- A hack that I'm not proud of.  
+
+  While stream and invites have unique tags generated prior to a user
+  clicking on the links, ucc messages, such as ad and partner,
+  generate their unique tags the moment they are clicked on. Similar
+  to stream and invites, ucc's unique tag needs to be one of the
+  parameters in the apa message. In order to do that I added a global
+  variable inside Kontagent::gen_short_tracking_code(). Inside
+  stripped_kt_args, I check to see if the global variable kt_short_tag
+  is defined. If so, it will be appended to the query_string. The url
+  returned by stripped_kt_args will become the final destination url
+  after authorization.
+
 
 Functions that are overridden by Kontagent in KtFacebook
 ---------------------------------------------------------
@@ -91,6 +104,15 @@ Functions that are overridden by Kontagent in KtFacebook
   checks to see if the app is a canvas or an iframe app. If so, it
   will set the next parameter to HTTP_REFERER, which is
   http://apps.facebook.com/[your_canvas_app].
+
+  In order to avoid double counting of click messages after an install
+  and to relate to apa the unique tag information, inside getLoginUrl,
+  it calls kt->stripped_kt_args() to get rid of all the kt_*
+  parameters, except for kt_ut and kt_sut. As a result, when it
+  finally arrives at the landing page, it will still have access to
+  the tag information. Since the kt_type parameters along with all
+  other kt_* are missing, it won't send another kontagent click
+  response message.
  
 Functions that are added by Kontagent in KtFacebook
 -----------------------------------------------------
