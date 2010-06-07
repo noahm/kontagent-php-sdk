@@ -90,6 +90,17 @@ if(isset($_POST["clicked_button"])){
                          'st1Event', 'st2Event', 'st3Event');
         break;
     }
+    case "php goal count":
+    {
+        $kt->track_goal_count($uid, 1, 10);
+        break;
+    }
+    case "php multi goal count":
+    {
+        $kt->track_multiple_goal_counts($uid, array(1=>10, 2=>20, 3=>30));
+        break;
+    }
+    
     }
 }
 
@@ -137,6 +148,10 @@ if(isset($_POST["clicked_button"])){
          <input name="clicked_button" type="button" value="js revenue" onclick="test_js_revenue()"/>
          <input name="clicked_button" type="submit" value="php event"/>
          <input name="clicked_button" type="button" value="js event" onclick="test_js_event()"/>
+         <input name="clicked_button" type="submit" value="php goal count"/>
+         <input name="clicked_button" type="submit" value="php multi goal count"/>
+         <input name="clicked_button" type="button" value="js goal count" onclick="test_js_goal_count()"/>
+         <input name="clicked_button" type="button" value="js multi goal count" onclick="test_js_multi_goal_count()"/>
          <input name="clicked_button" type="button" value="js setcookie" onclick="test_js_data_setcookie()"/>
          <input name="clicked_button" type="button" value="js getcookie" onclick="test_js_data_getcookie()"/>
          </form>
@@ -276,6 +291,13 @@ function test_js_revenue(){
 }
 function test_js_event(){
     kt.track_event("js event", 2, 10, "jsSt1", "jsSt2", "jsSt3");
+}
+
+function test_js_goal_count(){
+    kt.track_goal_count(kt.get_session_uid(), 1, 4);
+}
+function test_js_multi_goal_count(){
+    kt.track_multi_goal_counts(kt.get_session_uid(), {1:10, 2:20});
 }
 
 </script>

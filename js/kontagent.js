@@ -355,6 +355,32 @@ Kontagent.prototype = {
     }
   },
 
+  // uid can be a number or a string or an array of uids.
+  track_goal_count : function(uid, goal_id, inc)
+  {
+    var args = {
+    };
+    args[goal_id] = inc;
+    this.track_multi_goal_counts(uid, args);
+  },
+
+  // uid can be a number or a string or an array of uids.
+  // goal_counts : Example: {1=>10. 2=>20};
+  track_multi_goal_counts : function(uid, goal_counts)
+  {
+    var params = {};
+    if ((typeof uid) == 'string' || (typeof uid) == 'number') {
+      params['s'] = uid;
+    }else if((typeof uid) == 'object'){
+      params['s'] = uid.join(',');
+    }
+
+    for(var key in goal_counts){
+      params['gc'+key]  = goal_counts[key];
+    }
+    this.kt_outbound_msg('gci', params);
+  },
+
   kt_outbound_msg : function(channel, params)
   {
     var timestamp = Date.parse((new Date()).toUTCString().slice(0, -4))/1000;

@@ -415,4 +415,32 @@ class Kontagent
                                                       $subtype1, $subtype2, $subtype3);
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
+
+
+    public function gen_tracking_goal_count($uid, $goal_counts)
+    {
+        $params = array();
+        if(is_array($uid))
+            $params['s'] = join(',' ,$uid);
+        else
+            $params['s'] = $uid;
+
+        foreach($goal_counts as $key => $value)
+            $params['gc'.$key] = $value;
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'gci', $params);
+    }
+    public function track_goal_count($uid, $goal_id, $inc)
+    {
+        $tracking_url = $this->gen_tracking_goal_count($uid, array($goal_id => $inc));
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+    //
+    // $uid : uid integer or an array of uids.
+    // 
+    public function track_multiple_goal_counts($uid, $goal_counts)
+    {
+        $tracking_url = $this->gen_tracking_goal_count($uid, $goal_counts);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+    
 }
