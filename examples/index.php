@@ -79,8 +79,18 @@ if(isset($_POST["clicked_button"])){
                                         ));
         break;
     }
+    case "php revenue":
+    {
+        $kt->track_revenue($uid, 110);
+        break;
     }
-    
+    case "php event":
+    {
+        $kt->track_event($uid, "test php event", 10, 2,
+                         'st1Event', 'st2Event', 'st3Event');
+        break;
+    }
+    }
 }
 
 
@@ -105,8 +115,8 @@ if(isset($_POST["clicked_button"])){
   <body>
     <div id="fb-root"></div>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="../kt/js/kontagent.js?v=31"></script>
-    <script src="../kt/js/kt_facebook.js?v=31"></script>
+    <script src="../kt/js/kontagent.js?v=32"></script>
+    <script src="../kt/js/kt_facebook.js?v=32"></script>
           
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>
@@ -121,8 +131,12 @@ if(isset($_POST["clicked_button"])){
 
     <form method="POST" action="<?php echo $canvas_callback_url;?>">
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
-         <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
          <input name="clicked_button" type="submit" value="php stream"/>
+         <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
+         <input name="clicked_button" type="submit" value="php revenue"/>
+         <input name="clicked_button" type="button" value="js revenue" onclick="test_js_revenue()"/>
+         <input name="clicked_button" type="submit" value="php event"/>
+         <input name="clicked_button" type="button" value="js event" onclick="test_js_event()"/>
          <input name="clicked_button" type="button" value="js setcookie" onclick="test_js_data_setcookie()"/>
          <input name="clicked_button" type="button" value="js getcookie" onclick="test_js_data_getcookie()"/>
          </form>
@@ -257,4 +271,12 @@ function test_js_stream(){
 }
 
 
+function test_js_revenue(){
+    kt.track_revenue(220);
+}
+function test_js_event(){
+    kt.track_event("js event", 2, 10, "jsSt1", "jsSt2", "jsSt3");
+}
+
 </script>
+      

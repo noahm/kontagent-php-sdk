@@ -382,5 +382,37 @@ class Kontagent
         $tracking_url = $this->gen_tracking_ucc_click_url($recipient_uid, $short_tag);
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
+    
 
+    public function gen_tracking_revenue_url($uid, $amount_in_cents)
+    {
+        $params = array('s' => $uid,
+                        'v' => $amount_in_cents);
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'mtu', $params);
+    }
+    public function track_revenue($uid, $amount_in_cents)
+    {
+        $tracking_url = $this->gen_tracking_revenue_url($uid, $amount_in_cents);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+
+    public function gen_tracking_event_url($uid, $event_name, $value=null, $level=null,
+                                           $st1=null, $st2=null, $st3=null)
+    {
+        $params = array('s' => $uid,
+                        'n' => $event_name);
+        if(isset($value)) $params['v'] = $value;
+        if(isset($level)) $params['l'] = $level;
+        if(isset($st1)) $params['st1'] = $st1;
+        if(isset($st2)) $params['st2'] = $st2;
+        if(isset($st3)) $params['st3'] = $st3;   
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'evt', $params);
+    }
+    public function track_event($uid, $event_name, $value=null, $level=null,
+                                $subtype1=null, $subtype2=null, $subtype3=null)
+    {
+        $tracking_url = $this->gen_tracking_event_url($uid, $event_name, $value, $level,
+                                                      $subtype1, $subtype2, $subtype3);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
 }

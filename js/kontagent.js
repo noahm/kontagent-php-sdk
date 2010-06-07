@@ -327,6 +327,33 @@ Kontagent.prototype = {
     this.kt_outbound_msg('cpu', params);
   },
 
+  track_revenue : function(amount_in_cents)
+  {
+    var uid = this.get_session_uid();
+    if(uid)
+    {
+      var params = { s : uid,
+      v : amount_in_cents };
+      this.kt_outbound_msg('mtu', params);
+    }
+  },
+
+  track_event : function(event_name, value, level,
+			 st1, st2, st3)
+  {
+    var uid = this.get_session_uid();
+    if(uid)
+    {
+      var params = { s : uid,
+		     n : event_name };
+      if(value != null) params['v'] = value;
+      if(level != null) params['l'] = level;
+      if(st1 != null) params['st1'] = st1;
+      if(st2 != null) params['st2'] = st2;
+      if(st3 != null) params['st3'] = st3;
+      this.kt_outbound_msg('evt', params);
+    }
+  },
 
   kt_outbound_msg : function(channel, params)
   {
@@ -358,7 +385,9 @@ Kontagent.prototype = {
   get_session_uid : function()
   {
     var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
-    var uid = JSON.parse(parsed_qs['session'])['uid'];
+    var uid = null;
+    if(parsed_qs['session'] != undefined)
+      uid = JSON.parse(parsed_qs['session'])['uid'];
     return uid;
   },
 
