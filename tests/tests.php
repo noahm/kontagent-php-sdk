@@ -6,7 +6,7 @@ require_once '../php/kt_comm_layer.php';
 
 class KontagentTest extends PHPUnit_Framework_TestCase
 {
-    //const KT_HOST = 'http://api.test.kontagent.com';
+    //const KT_HOST = 'http://test-server.kontagent.com';
     const KT_HOST = 'tofoo.dyndns.org:8080';
     const KT_API_KEY = 'abcabc';
     const APP_URL = "http://apps.facebook.com/myapp/"; 
