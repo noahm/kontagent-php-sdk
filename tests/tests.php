@@ -202,6 +202,44 @@ class KontagentTest extends PHPUnit_Framework_TestCase
                              'kt_ut should be the only parameter in the query str.' );
     }
 
+    public function testStrippedKtArgsWithShortTag()
+    {
+        $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);        
+        $kt_url = 'http://apps.facebook.com/lih_test_lowlevelnew/?kt_type=partner';
+        
+        $short_tracking_code = $kt->gen_short_tracking_code();
+        global $kt_short_tag;
+        
+        $r_url = $kt->stripped_kt_args($kt_url);
+        
+        $r_items_arry = parse_url($r_url);
+        parse_str($r_items_arry['query'], $r_GET_arry);
+
+        $this->assertEquals( isset($r_GET_arry['kt_sut']), true,
+                             'kt_sut should be in the query str.');
+        $this->assertEquals( sizeof($r_GET_arry) , 1,
+                             'kt_sut should be the only parameter in the query str.' );
+    }
+
+    public function testStrippedKtArgsWithShortTagAndExtraTags()
+    {
+        $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);        
+        $kt_url = 'http://apps.facebook.com/lih_test_lowlevelnew/?kt_type=partner&foo=bar';
+        
+        $short_tracking_code = $kt->gen_short_tracking_code();
+        global $kt_short_tag;
+        
+        $r_url = $kt->stripped_kt_args($kt_url);
+        
+        $r_items_arry = parse_url($r_url);
+        parse_str($r_items_arry['query'], $r_GET_arry);
+        $this->assertEquals( isset($r_GET_arry['foo']), true,
+                             "foo should still be there" );
+        $this->assertEquals( isset($r_GET_arry['kt_sut']), true,
+                             'kt_sut should be in the query str.');
+    }
+    
+    
     public function testGenTrackingInviteSentUrl()
     {
         $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
