@@ -55,6 +55,8 @@ class KontagentTest extends PHPUnit_Framework_TestCase
     {
         $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY, false);
         $short_tracking_code = $kt->gen_short_tracking_code();
+        global $kt_short_tag;
+        $kt_short_tag = null; // So it doesn't screw up other tests
         $this->assertEquals(strlen($short_tracking_code), 8,
                             'A short tracking code must to be 8 character long');
     }
@@ -153,27 +155,24 @@ class KontagentTest extends PHPUnit_Framework_TestCase
         $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
         $kt_url = 'http://apps.facebook.com/lih_test_lowlevelnew/?kt_type=ins&kt_ut=6114be4c5ecb69e4&kt_uid=1166673718&kt_st1=st111&kt_st2=st222&kt_st3=st333&foo=bar';
 
-        //
-        // faking hella data: $_SERVER['HTTP_REFERER'] and $_GET
-        //
-        $items_arry = parse_url($kt_url);
-        parse_str($items_arry['query'],$_GET);
-        $_SERVER['HTTP_REFERER'] = $kt_url;
-        
-        $r_url = $kt->stripped_kt_args();
+        $r_url = $kt->stripped_kt_args($kt_url);
         $r_items_arry = parse_url($r_url);
+
+        $this->assertEquals(isset($r_items_arry['query']), true,
+                            "should have a query string.");
         parse_str($r_items_arry['query'], $r_GET_arry);
 
+        
         $this->assertEquals( isset($r_GET_arry['kt_type']), false,
                              "kt_type shouldn't be in the query str." );
-        $this->assertEquals( isset($r_GET_arry['kt_ut']),   false,
-                             "kt_type shouldn't be in the query str." );
+        $this->assertEquals( isset($r_GET_arry['kt_ut']),   true,
+                             "kt_ut should be in the query str." );
         $this->assertEquals( isset($r_GET_arry['kt_st1']),  false,
-                             "kt_type shouldn't be in the query str." );
+                             "kt_st1 shouldn't be in the query str." );
         $this->assertEquals( isset($r_GET_arry['kt_st2']),  false,
-                             "kt_type shouldn't be in the query str." );
+                             "kt_st2 shouldn't be in the query str." );
         $this->assertEquals( isset($r_GET_arry['kt_st3']),  false,
-                             "kt_type shouldn't be in the query str." );
+                             "kt_st3 shouldn't be in the query str." );
         $this->assertEquals( isset($r_GET_arry['foo']), true,
                              "foo should still be there" );
     }
@@ -193,12 +192,14 @@ class KontagentTest extends PHPUnit_Framework_TestCase
         $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
         $kt_url = 'http://apps.facebook.com/lih_test_lowlevelnew/?kt_type=ins&kt_ut=6114be4c5ecb69e4&kt_uid=1166673718&kt_st1=st111&kt_st2=st222&kt_st3=st333';
 
-        $this->setupServerAndGetVar($kt_url);
-        
-        $r_url = $kt->stripped_kt_args();
+        $r_url = $kt->stripped_kt_args($kt_url);
         $r_items_arry = parse_url($r_url);
-        $this->assertEquals( isset($r_items_arry['query']), false,
-                             "shouldn't have a query_string");
+        parse_str($r_items_arry['query'], $r_GET_arry);
+
+        $this->assertEquals( isset($r_GET_arry['kt_ut']), true,
+                             'kt_ut should be in the query str.');
+        $this->assertEquals( sizeof($r_GET_arry) , 1,
+                             'kt_ut should be the only parameter in the query str.' );
     }
 
     public function testGenTrackingInviteSentUrl()
