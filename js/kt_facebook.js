@@ -18,7 +18,7 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
 {
   var KT_FB = {};
   KT_FB.ui = FB.ui;
-//  KT_FB.login = FB.login;
+  KT_FB.login = FB.login;
   KT_FB.kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
   KT_FB.prototype = {
     gen_long_tracking_tag : function()
@@ -26,22 +26,6 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
       return Math.uuid().substring(0,16);
     }
   };
-
-//   FB.login = function( cb, opts ){
-//     console.log("here");//xxx
-//     debugger;//xxx
-//     var kt_cb = function(resp){
-//       console.log("wtf");//xxx
-//       if(resp.session){
-// 	console.log("inside kt_cb");//xxx
-// 	window.SESSION = response.session;
-// 	KT_FB.kt.track_install();
-//       }
-//       if(cb != undefined || cb != null)
-// 	cb(resp);
-//     };
-//     KT_FB.login(kt_cb, opts);
-//   };
 
   FB.ui = function(params, cb){
     var uid = KT_FB.kt.get_session_uid();
@@ -105,13 +89,27 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
 	    }
 	  };
 	}
-      }//if(params['method'] != undefined...
-      KT_FB.ui(params, kt_cb);
+	KT_FB.ui(params, kt_cb);
+      }else{//if(params['method'] != undefined...
+	KT_FB.ui(params, cb);
+      }
     }else{  //if(uid)
       KT_FB.ui(params, cb);
     }
 
   };//FB.ui = function...
+
+  FB.login = function( cb, opts ){
+    var kt_cb = function(resp){
+      if(resp.session){
+	window.SESSION = resp.session;
+	KT_FB.kt.track_install();
+      }
+      if(cb != undefined || cb != null)
+	cb(resp);
+    };
+    KT_FB.login(kt_cb, opts);
+  };
 }
 
 
