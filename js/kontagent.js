@@ -260,6 +260,18 @@ function Kontagent(kt_host, kt_api_key){
 Kontagent.prototype = {
   run : function()
   {
+    // capture install
+    if(window.SESSION){
+      // this is for handling login from the php side
+      var browser_install_cookie_key = this.gen_kt_handled_installed_cookie_key(FB_ID, SESSION['uid']);
+      console.log(getCookie(browser_install_cookie_key));//xxx
+      if( !getCookie(browser_install_cookie_key) ){
+	console.log("hit facebook cookie");//xxx
+	this.track_install();
+	setCookie(browser_install_cookie_key, 'done');
+      }
+    }
+
     // capture User Info
     if(window.SESSION){
       var user_info_cookie_key = this.gen_kt_capture_user_info_key(FB_ID, SESSION['uid']);
@@ -279,18 +291,79 @@ Kontagent.prototype = {
     }
   },
 
+  gen_kt_handled_installed_cookie_key: function(fb_api_key, uid)
+  {
+    return 'kt_handled_installed_'+fb_api_key+"_"+uid;
+  },
+
   gen_kt_capture_user_info_key : function(app_id, uid)
   {
     return 'kt_capture_user_info_'+app_id+"_"+uid;
   },
 
+  track_install : function()
+  {
+    if(!window.SESSION) return;
+    if(FB._session == null || FB._session == undefined){
+      FB.init({appId   : FB_ID,
+	       xfbml   : true,
+	       session : SESSION
+	      });
+    }
+
+    var this_obj = this;
+    FB.api(
+      {
+	method : 'data.getCookies',
+	name   : 'kt_just_installed',
+	uid    : FB.getSession().uid
+      },
+      function(response){
+	var len = response.length;
+	for(var i =0; i < len; i++)
+	{
+	  var cookie = response[i];
+	  if(cookie.name == 'kt_just_installed' &&
+	     cookie.uid == FB.getSession().uid &&
+	     cookie.value == 1){
+	    this_obj.track_install_impl();
+	    FB.api(
+	      {
+		method  : 'data.setCookie',
+		name    : 'kt_just_installed',
+		uid     : FB.getSession().uid,
+		expires : Math.round((new Date()).getTime()/1000) - 345600
+	      }
+	    );
+	  }
+	}// for
+      }//function
+    );
+  },
+  track_install_impl: function()
+  {
+    var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
+    var params = {
+      s : FB.getSession().uid
+    };
+    if(parsed_qs['kt_ut'] != undefined){
+      params['u'] = parsed_qs['kt_ut'];
+    }else if(parsed_qs['kt_sut'] !=undefined){
+      params['su'] = parsed_qs['kt_sut'];
+    }
+    this.kt_outbound_msg('apa', params);
+  },
+
   track_user_info : function()
   {
     if( !window.SESSION ) return;
-    FB.init({ appId   : FB_ID,
-	      xfbml   : true ,
-	      session : SESSION
-	    });
+    if(FB._session == null || FB._session == undefined){
+      FB.init({ appId   : FB_ID,
+		xfbml   : true ,
+		session : SESSION
+	      });
+    }
+
     var me_json = null;
     var me_friends_json = null;
     var this_obj = this;

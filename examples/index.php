@@ -126,8 +126,8 @@ if(isset($_POST["clicked_button"])){
   <body>
     <div id="fb-root"></div>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="../kt/js/kontagent.js?v=32"></script>
-    <script src="../kt/js/kt_facebook.js?v=32"></script>
+    <script src="../kt/js/kontagent.js?v=40"></script>
+    <script src="../kt/js/kt_facebook.js?v=40"></script>
           
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>

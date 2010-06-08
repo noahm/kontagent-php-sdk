@@ -55,6 +55,9 @@ if (isset($_REQUEST['session'])) {
     $session = validateSessionObject($session);
 }
 
+error_log("kt_post_authorize");//xxx
+
+
 if($session)
 {
     //

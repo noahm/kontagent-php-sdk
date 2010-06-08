@@ -50,13 +50,13 @@ class Kontagent
         return $this->m_send_msg_from_js;
     }
     
-    public function gen_kt_handled_installed_cookie_key($fb_api_key, $uid)
+    public function gen_kt_handled_installed_cookie_key($fb_id, $uid)
     {
-        return 'kt_handled_installed_'.$fb_api_key."_".$uid;
+        return 'kt_handled_installed_'.$fb_id."_".$uid;
     }
-    public function gen_kt_capture_user_info_key($fb_api_key, $uid)
+    public function gen_kt_capture_user_info_key($fb_id, $uid)
     {
-        return 'kt_capture_user_info_'.$fb_api_key."_".$uid;
+        return 'kt_capture_user_info_'.$fb_id."_".$uid;
     }
     
     public function gen_long_tracking_code()
