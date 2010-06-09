@@ -278,6 +278,115 @@ class KontagentTest extends PHPUnit_Framework_TestCase
         $ktCommLayer->api_call_method($tracking_url);
     }
 
+
+    public function testGenTrackingInstallUrl()
+    {
+        $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
+        $uid = 12345678;
+        // fake _SERVER Data
+        $_SERVER['HTTP'] = 'on';
+        $_SERVER['SERVER_NAME'] = 'tofoo.dyndns.org';
+        $_SERVER['REQUEST_URI'] = '/testapp/?kt_ut=12345';
+        $_SERVER['SERVER_PORT'] = '8080';
+        $url = $kt->gen_tracking_install_url($uid);
+        $items_arry = parse_url($url);
+        parse_str($items_arry['query'], $r_GET_arry);
+
+        $this->assertEquals(isset($r_GET_arry['s']), true,
+                            "s(uid) is required.");
+        $this->assertEquals(isset($r_GET_arry['u']), true,
+                            "u(unique tracking tag) is required");
+    }
+
+    public function testGenTrackingStreamSendUrl()
+    {
+        $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
+
+        $st1 = 'st11';
+        $st2 = 'st22';
+        $st3 = 'st33';
+        $url = $kt->gen_tracking_stream_send_url('123', '6114be4c5ecb69e4', $st1, $st2, $st3);
+        $items_arry = parse_url($url);
+
+        $tmp_path_arry = split('/', $items_arry['path']);
+        $len = sizeof($tmp_path_arry);
+        $this->assertEquals($tmp_path_arry[$len-2], 'pst',
+                            "It should be a pst type");
+        parse_str($items_arry['query'], $r_GET_arry);
+        
+        $this->assertEquals($r_GET_arry['tu'], 'stream',
+                            "tu needs to type stream.");
+        $this->assertEquals(isset($r_GET_arry['u']), true,
+                            "u is required");
+        $this->assertEquals($r_GET_arry['st1'], $st1,
+                            "st1 doesn't match");
+        $this->assertEquals($r_GET_arry['st2'], $st2,
+                            "st2 doesn't match");
+        $this->assertEquals($r_GET_arry['st3'], $st3,
+                            "st3 doesn't match");
+    }
+
+    public function testGenTrackingStreamClickUrl()
+    {
+        $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
+        $kt_url = 'http://apps.facebook.com/lih_test_lowlevelnew/?kt_type=stream&kt_ut=6114be4c5ecb69e4&kt_uid=1166673718&kt_st1=st111&kt_st2=st222&kt_st3=st333';        
+        $this->setupServerAndGetVar($kt_url);
+        
+        $url = $kt->gen_tracking_stream_click_url('54321');
+        $items_arry = parse_url($url);
+
+        $tmp_path_arry = split('/', $items_arry['path']);
+        $len = sizeof($tmp_path_arry);
+        $this->assertEquals( $tmp_path_arry[$len-2], 'psr',
+                             'the message type needs to be psr');
+
+        parse_str($items_arry['query'], $r_GET_arry);
+        $this->assertEquals( $r_GET_arry['tu'], 'stream',
+                             'tu should be stream.' );
+        $this->assertEquals( isset($r_GET_arry['u']), true,
+                             'The unique track needs to there' );
+        $this->assertEquals( isset($r_GET_arry['st1']), true,
+                             'st1 is missing' );
+        $this->assertEquals( isset($r_GET_arry['st2']), true,
+                             'st2 is missing' );
+        $this->assertEquals( isset($r_GET_arry['st3']), true,
+                             'st3 is missing' );
+        $this->assertEquals( $r_GET_arry['i'] , 0,
+                             'The install needs to be zero');
+    }
+
+    public function testGenTrackingUccClickUrl()
+    {
+        $kt = new Kontagent(self::KT_HOST, self::KT_API_KEY);
+        $st1 = 'st1111';
+        $st2 = 'st2222';
+        $st3 = 'st3333';
+        $kt_url = 'http://apps.facebook.com/lih_test_lowlevelnew/?kt_type=ad&kt_st1='.$st1.'&kt_st2='.$st2.'&kt_st3='.$st3;
+        $this->setupServerAndGetVar($kt_url);
+
+        $url = $kt->gen_tracking_ucc_click_url('54321', 'deadbeaf');
+        echo $url;
+        $items_arry = parse_url($url);
+        $tmp_path_arry = split('/', $items_arry['path']);
+        $len = sizeof($tmp_path_arry);
+        $this->assertEquals( $tmp_path_arry[$len-2], 'ucc',
+                             'the message type needs to be ucc');
+        parse_str($items_arry['query'], $r_GET_arry);
+
+        $this->assertEquals( $r_GET_arry['tu'], "ad",
+                             'should be an ad type' );
+        $this->assertEquals( isset($r_GET_arry['su']), true,
+                             'the short tag needs to be there.' );
+        $this->assertEquals( $r_GET_arry['st1'], $st1,
+                             'st1 doesnt match');
+        $this->assertEquals( $r_GET_arry['st2'], $st2,
+                             'st2 doesnt match');
+        $this->assertEquals( $r_GET_arry['st3'], $st3,
+                             'st3 doesnt match');
+        
+    }
+
+    
 /*     public function testKtCommLayerSelectServer() */
 /*     { */
 /*         $host = 'api.geo.kontagent.net'; */
