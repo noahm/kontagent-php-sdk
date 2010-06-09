@@ -1,4 +1,4 @@
-Facebook Hacks for canvas apps (FAQs)
+Facebook canvas apps (FAQs)
 -------------------------------------
 
 - Why am I not getting fb_sig_* parameters anymore?  
@@ -197,11 +197,20 @@ Setup
     <script src="[path]/kontagent.js"></script>
     <script src="[path]/kt_facebook.js"></script>
 
+If you are tracking from the js side only, you will need to define the
+following variables: KT_API_SERVER and KT_API_KEY. However, if you
+have already included the php files in step one, kt_landing will
+generate these parameters for you.
+    
+    
 3) require login 
    
     To prompt new users the authorization page or to get the session
     object for returning users, call $facebook->fbNativeAppRequireLogin();
-
+    
+    If you are using Facebook JS SDK to sign in your users, FB.login
+    will automatically track apa(install event) for you, assuming that
+    you have done step 2 correctly.
 
 Invite Send (ins)
 -----------------
@@ -316,6 +325,55 @@ Handles by kt_landing.php. If SEND_MSG_VIA_JS is true in
 kt_config.php, kontagent.js will handle the sending of the kontagent
 message.
 
+Revenue Tracking (php)
+----------------------
+$kt->track_revenue($uid, [pass in your dollar value in cents]);
+
+For instance, if the value is $2.20, you will need to pass in 220.
+
+Revenue Tracking (js)
+---------------------
+kt.track_revenue([pass in your dollar value in cents]);
+
+For instance, if the value is $2.20, you will need to pass in 220.
+
+Event_Tracking (php)
+--------------------
+$kt->track_event($uid, [event name], [value], [level],
+                [subtype 1 text], [subtype 2 text], [subtype 3 text]);
+
+Event_Tracking (js)
+-------------------
+kt.track_event([event name], [value], [level],
+               [subtype 1 text], [subtype 2 text], [subtype 3 text]);
+
+Goal Count (php)
+----------------
+$kt->track_goal_count($uid, [goal number, 1-4], [increment value]);
+
+$uid: can be a number or an array of uids;
+The goal number parameter will simply be 1-4;
+
+Goal Count (js)
+---------------
+kt.track_goal_count(uid, [goal number, 1-4], [increment value]);
+
+uid: can be a number or an array of uids;
+The goal number parameter will simply be 1-4;
+
+Multi Goal Count (php)
+----------------------
+$kt->track_multiple_goal_counts(uid, array([goal id1] => [goal1 value],
+				           [goal id2] => [goal2 value]));
+
+The goal number parameter will simply be 1-4;
+
+Multi Goal Count (js)
+----------------------
+kt.track_multiple_goal_counts(uid, {[goal id1]:[goal1 value],
+				    [goal id2]:[goal2 value]);
+
+The goal number parameter will simply be 1-4;
 
 
 Technical Details:
@@ -329,13 +387,13 @@ authorized your app. The cookie name is kt_just_installed.
 Once FB forwards the user back to your landing page. kt_landing.php
 first will check to see if the user has already installed your app. If
 not, there's no point in determining whether the user has just install
-the app. If so, it will first check a browser(not a facebook cookie)
-to see if we've already checked for the user's install status. If the
-browser cookie is not set, it will then call data.getcookies to see if
-kt_just_installed is set. If it's set, an apa message will be sent to
-Kontagent. The browser cookie is in place to prevent future round trip
-time between Facebook and your app server caused by calling
-data.getcookies per page load.
+the app. If so, it will first check the browser cookie(not a facebook
+cookie) to see if we've already checked for the user's install
+status. If the browser cookie is not set, it will then call
+data.getcookies to see if kt_just_installed is set. If it's set, an
+apa message will be sent to Kontagent. The browser cookie is in place
+to prevent future round trip time between Facebook and your app server
+caused by calling data.getcookies per page load.
 
 
 

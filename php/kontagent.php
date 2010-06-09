@@ -114,20 +114,22 @@ class Kontagent
     public function stripped_kt_args($url)
     {
         $parsed_url_arry = parse_url($url);
+        if(!isset($parsed_url_arry['query']))
+            return $url;
+        parse_str($parsed_url_arry['query'], $parsed_GET);
+
         $params = array();
-        foreach($_GET as $arg => $val)
+        foreach($parsed_GET as $arg => $val)
         {
             if(preg_match('/kt_*/',  $arg))
                 if($arg != 'kt_ut') 
                     continue;
-            else
-            {
-                $params[$arg] = $val;
-            }
+            $params[$arg] = $val;
         }
-
+        
         // kt_short_tag is set in gen_short_tracking_code().
         global $kt_short_tag;
+        
         if(isset($kt_short_tag)){
             $params['kt_sut'] = $kt_short_tag;
         }

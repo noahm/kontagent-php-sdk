@@ -8,8 +8,8 @@ require_once '../kt/php/kt_landing.php';
 ?>
 <div id="fb-root"></div>
 <script src="http://connect.facebook.net/en_US/all.js"></script>
-<script src="../kt/js/kontagent.js?v=36"></script>
-<script src="../kt/js/kt_facebook.js?v=36"></script>
+<script src="../kt/js/kontagent.js?v=43"></script>
+<script src="../kt/js/kt_facebook.js?v=43"></script>
 
 <input type="button" value="fb login" onclick="test_fb_login()"/>
 <input type="button" value="track install" onclick="test_track_install()"/>
@@ -24,7 +24,7 @@ function test_fb_login()
     FB.login(function(response){
             if(response.session){
                 // successfully logged in
-                console.log("wtf");//xxx
+                console.log("successfully logged in");//xxx
             }else{
                 // cancel login
                 console.log("cancelled login");//xxx
