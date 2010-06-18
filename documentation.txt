@@ -71,6 +71,13 @@ Facebook canvas apps (FAQs)
   KtFacebook::getLoginUrl() in kt_facebook.php for more details.
 
 
+- My install tracking does work. I did verify that the
+  post_authorize.php is being called. What's up with that?
+  
+  Go to your Application settings on Facebook. Click on the Migration
+  tab, make sure that "New SDKs" and "New Data Permissions" are
+  enabled.
+
 - A hack that I'm not proud of.  
 
   While stream and invites have unique tags generated prior to a user
