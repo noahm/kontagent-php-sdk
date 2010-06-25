@@ -264,9 +264,7 @@ Kontagent.prototype = {
     if(window.SESSION){
       // this is for handling login from the php side
       var browser_install_cookie_key = this.gen_kt_handled_installed_cookie_key(FB_ID, SESSION['uid']);
-      console.log(getCookie(browser_install_cookie_key));//xxx
       if( !getCookie(browser_install_cookie_key) ){
-	console.log("hit facebook cookie");//xxx
 	this.track_install();
 	setCookie(browser_install_cookie_key, 'done');
       }

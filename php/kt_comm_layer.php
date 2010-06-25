@@ -92,13 +92,11 @@ class KtCommLayer
         if ($this->m_server == "") {
             $this->select_server();
         }
-        error_log("m_server is : ".$this->m_server);//xxx
         
         if ($this->m_server != "") {
             if (!$this->m_socket) {
                 $this->m_socket = @stream_socket_client($this->m_server, $errno, $errstr, 0.5, STREAM_CLIENT_CONNECT);
             }
-            error_log("m_socket :".$this->m_socket);//xxx
             
             if ($this->m_socket) {
                 fwrite($this->m_socket, "GET $tracking_url HTTP/1.1\r\n");
