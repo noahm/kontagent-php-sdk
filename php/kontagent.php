@@ -1,4 +1,4 @@
-<?
+<?php
 /*
  * @copyright 2010 Kontagent
  * @link http://www.kontagent.com
