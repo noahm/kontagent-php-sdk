@@ -45,7 +45,6 @@ function generateSignature($params, $secret) {
     return md5($base_string);
 }
 
-
 if (isset($_REQUEST['session'])) {
     $session = json_decode(
         get_magic_quotes_gpc()
@@ -53,6 +52,19 @@ if (isset($_REQUEST['session'])) {
         : $_REQUEST['session'],
         true);
     $session = validateSessionObject($session);
+}else{
+    // old permission, ie. need to convert fb_sig_* into a new session object
+    $ch = curl_init();
+    $data = array('type'=>'client_cred',
+                  'client_id'=>FB_ID,
+                  'client_secret' => FB_SECRET,
+                  'sessions' => $_REQUEST['fb_sig_session_key']);
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/oauth/exchange_sessions');
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    $session = curl_exec($ch);
+    curl_exec($ch);
 }
 
 
