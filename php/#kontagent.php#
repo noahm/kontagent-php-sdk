@@ -154,7 +154,7 @@ class Kontagent
     {
         $position = strpos($original_url, '?');
         
-        /* There are no query params, just append the new one */
+        /* There are no querya params, just append the new one */
         if ($position === false) {
             return $original_url.'?'.$query_str;
         }
@@ -395,7 +395,6 @@ class Kontagent
     public function track_revenue($uid, $amount_in_cents)
     {
         $tracking_url = $this->gen_tracking_revenue_url($uid, $amount_in_cents);
-        error_log($tracking_url); //xxx
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 

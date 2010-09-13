@@ -1,12 +1,16 @@
 <?php
+error_log("here");//xxx
 require_once '../src/facebook.php';
 require_once '../kt/php/kt_config.php';
 require_once '../kt/php/kontagent.php';
 require_once '../kt/php/kt_facebook.php';
 require_once '../kt/php/kt_landing.php';
 
+if(isset($_REQUEST['fb_mfs_step'])){
+    error_log('=====>fb_mfs_step:' . $_REQUEST['fb_mfs_step']);
+}
 
-$canvas_url = "http://apps.facebook.com/lih_test_lowlevelnew/";
+$canvas_url = FB_CANVAS_URL;
 $canvas_callback_url = FB_CALLBACK_URL;
 
 // Create our Application instance.
@@ -18,8 +22,12 @@ $facebook = new KtFacebook(array('appId'  => FB_ID,
 
 // Create a kontagent instance
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
-$session = $facebook->fbNativeAppRequireLogin(array('req_perms'=>'publish_stream,user_birthday,user_relationships',
-                                                    'display'=>'popup')); //lihchen
+
+//$session = $facebook->fbNativeAppRequireLogin(array('req_perms'=>'publish_stream,user_birthday,user_relationships',
+//                                                    'display'=>'popup')); //lihchen
+$session = $facebook->fbNativeAppRequireLogin(array('canvas'=>1, 'fbconnect'=>0,
+                                                    'req_perms'=>'publish_stream,user_birthday,user_relationships')); //lihchen
+
 
 // We may or may not have this data based on a $_GET or $_COOKIE based session.
 //
@@ -144,6 +152,7 @@ if(isset($_POST["clicked_button"])){
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
          <input name="clicked_button" type="submit" value="php stream"/>
          <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
+         <input name="clicked_button" type="button" value="js invite" onclick="test_js_invite()" />
          <input name="clicked_button" type="submit" value="php revenue"/>
          <input name="clicked_button" type="button" value="js revenue" onclick="test_js_revenue()"/>
          <input name="clicked_button" type="submit" value="php event"/>
@@ -155,11 +164,13 @@ if(isset($_POST["clicked_button"])){
          <input name="clicked_button" type="button" value="js setcookie" onclick="test_js_data_setcookie()"/>
          <input name="clicked_button" type="button" value="js getcookie" onclick="test_js_data_getcookie()"/>
          </form>
-
+    <a href="#" onclick="goto_invite_page()">Invite</a>
+          
     <h3>Session</h3>
     <?php if ($me): ?>
     <pre><?php print_r($session); ?></pre>
-
+    <pre><?php print_r($_GET); ?></pre>
+    
     <h3>You</h3>
     <img src="https://graph.facebook.com/<?php echo $uid; ?>/picture">
     <?php echo $me['name']; ?>
@@ -177,20 +188,23 @@ $invite_post_link = $kt->gen_invite_post_link($canvas_callback_url,
                                               $long_tracking_code,
                                               $uid,
                                               "st111","st222","st333");
+error_log("--->>>".$invite_post_link);//xxx
 $invite_content_link = $kt->gen_invite_content_link($canvas_url,
                                                     $long_tracking_code,
                                                     'st111', 'st222', 'st333');
 
 ?>
-    
+
+<!--
 <fb:serverFbml>
 <script type="text/fbml">
 <fb:fbml>
     <fb:request-form
         method='POST'
-        action='<?php echo $invite_post_link?>'
+        action="http://www.cnn.com"
         invite='true'
-        type='join my Smiley group'
+        target='_top'
+        type='XFBML'
         content='Would you like to join my Smiley group? 
             <fb:req-choice url="<?php echo $invite_content_link?>" label="Yes" />'
         <fb:multi-friend-selector 
@@ -199,13 +213,17 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
 </fb:fbml>
 </script>
 </fb:serverFbml>
-    
+-->    
    </body>
 </html>
 
 
   
 <script>
+  function goto_invite_page(){
+    window.parent.location.href = "<?php echo $canvas_url;?>invite.php?fb_force_mode=fbml";
+  }
+
   if(window.SESSION)
   {
       FB.init({
@@ -283,6 +301,27 @@ function test_js_stream(){
 /*        console.log("og cb");//xxx */
 /*    } */
   );
+}
+
+function test_js_invite(){
+    var js_invite_content_link = "<?php echo $invite_content_link?>";
+    var js_invite_post_link = "<?php echo $invite_post_link?>";
+    FB.ui(
+        {
+          method : 'fbml.dialog',
+          fbml   : '<fb:fbml><fb:request-form action="' + js_invite_post_link +'" method="POST" invite="true" type="Vroom" content="You\'re invited to voice chat - check out Vroom. <fb:req-choice url=\'' + js_invite_content_link +'\' label=\'Add Vroom\' /> " > <fb:multi-friend-selector showborder="false" actiontext="Invite your friends to use Vroom."></fb:request-form></fb:fbml>', 
+          width  : 800, 
+          height : 100 },
+
+        function(response){
+            if (response && response.post_id) { 
+                alert('Post was published.'); 
+            } else { 
+                alert('Post was not published.'); 
+            } 
+        }
+          );
+    
 }
 
 

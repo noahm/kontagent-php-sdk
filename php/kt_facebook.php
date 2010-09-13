@@ -32,7 +32,7 @@ class KtFacebook extends Facebook
         if($session){
             return $session;
         }
-
+        
         $http_referer = $_SERVER['HTTP_REFERER'];
         if(preg_match('/http:\/\/apps.facebook.com*/', $http_referer))
         {
@@ -127,7 +127,7 @@ class KtFacebook extends Facebook
     public function getSession()
     {
         $session = parent::getSession();
-      
+        
         if(!$session && isset($_REQUEST['fb_sig_session_key']))
         {
             if(!$this->tokenSessionLoaded){

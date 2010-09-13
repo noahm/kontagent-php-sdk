@@ -49,6 +49,11 @@ if($uid){
         //
         // Track Install
         //
+
+        /****
+         * Facebook has gotten rid of post-authorized url for all new apps. FB did grandfathered
+         * old apps to keep their existing post-authroized url.
+         *
         $browser_install_cookie_key = $kt->gen_kt_handled_installed_cookie_key(FB_ID, $uid);
         if( !isset($_COOKIE[$browser_install_cookie_key]) ){
             $fb_cookie_arry = $facebook->api(array('method' => 'data.getcookies',
@@ -79,7 +84,15 @@ if($uid){
                 }
             }
         }
+        ***/
 
+        /***
+         * Facebook made installed=1 available again. We are going to take advantage of that.
+         */
+        if(isset($_GET['installed'])){
+            $kt->track_install($uid);
+        }
+        
         //
         //Acquire User Info
         //
@@ -114,6 +127,10 @@ if(isset($_GET['kt_type']))
                 $kt->gen_tracking_invite_sent_url().
                 "';</script>";
         }
+
+        // If your user gets forwarded outside of facebook,
+        // call $facebook->redirect([canvas url]) to forward your
+        // user back. 
         break;
     }
     case 'inr':

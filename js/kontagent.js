@@ -400,7 +400,7 @@ Kontagent.prototype = {
 
   track_revenue : function(amount_in_cents)
   {
-    var uid = this.get_session_uid();
+    var uid = FB.getSession().uid;
     if(uid)
     {
       var params = { s : uid,
@@ -412,7 +412,7 @@ Kontagent.prototype = {
   track_event : function(event_name, value, level,
 			 st1, st2, st3)
   {
-    var uid = this.get_session_uid();
+    var uid = FB.getSession().uid;
     if(uid)
     {
       var params = { s : uid,

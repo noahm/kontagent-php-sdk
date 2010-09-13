@@ -251,9 +251,7 @@ kt_landing.php, which then will generate a Kontagent REST call.
 
 4) Place the generated links at the right place in your FBML.
 
-<fb:serverFbml>
-<script type="text/fbml">
-<fb:fbml>
+
     <fb:request-form
         method='POST'
         action='<?php echo $invite_post_link?>'
@@ -264,10 +262,44 @@ kt_landing.php, which then will generate a Kontagent REST call.
         <fb:multi-friend-selector 
             actiontext="Invite your friends to join your Smiley group.">
     </fb:request-form>
-</fb:fbml>
-</script>
-</fb:serverFbml>
 
+5) Things to look out for.
+   
+   If you have your fb:request-form nested inside 
+    <fb:serverFbml>
+     <script type="text/fbml">
+     <fb:fbml>
+     </fb:fbml>
+     </script>
+    </fb:serverFbml>
+   
+   , you will find that your action link will not be hit after an invite
+   is sent out.
+
+   If you inspect the rendered HTML, you will find that your action
+   attribute is an empty string. You can get your action link rendered
+   properly if you use relative url. For example, instead of
+   http://..., use index.php?... However, fb:request-form is inside an
+   iframe. As a result, the actual URL that gets forwarded to is
+   relative to the URL of the iframe. 
+
+   Solution: Do not use <fb:serverFbml><script type="text/fbml">. You
+   can force FB to render FBML by passing in fb_force_mode=fbml as
+   part of the query string. For example, your invite url might be
+   http://apps.facebook.com/yourapp/invite.php?fb_force_mode=fbml.
+
+   Most likely your app lives inside an iframe, if you have have some
+   like <a href="<?php echo invite url goes here?>"> is not going to
+   work. You will need to use javascript to change the parent's frame
+   url via window.parent.location.href.
+
+   Finally, when your action url is hit, your user will be forwarded
+   outside of facebook. If your app is meant to be living inside of
+   facebook, this is probably not ideal. To fix this, you can go into
+   kt_landing.php, add $facebook->redirect([canvas url]) at the end of
+   the ins case block.
+
+   
 
 Invite Click (inr)
 ------------------
