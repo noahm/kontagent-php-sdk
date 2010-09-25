@@ -125,11 +125,11 @@ Functions that are added by Kontagent in KtFacebook
 -----------------------------------------------------
 - fbNativeAppRequireLogin()
 
-  It behaves the save as require_login() in the old facebook library.
+  It behaves the same as require_login() in the old facebook library.
 
 - redirect()
 
-  It behaves the save as redirect() in the old facebook library.
+  It behaves the same as redirect() in the old facebook library.
   
 - getAccessTokenFromSessionKey()
       
@@ -180,7 +180,7 @@ Setup
     SEND_MSG_VIA_JS 
     ---------------
     If it's set to true, it will delegate the sending of Kontagnent
-    messages to your users' browsers. This will free up bandwidth between
+    messages to your users' browsers. This will free up some bandwidth between
     you server and Kontagent.
 
 1) Add the following require_once after your facebook.php include to

@@ -309,38 +309,43 @@ Kontagent.prototype = {
 	      });
     }
 
-    var this_obj = this;
-    FB.api(
-      {
-	method : 'data.getCookies',
-	name   : 'kt_just_installed',
-	uid    : FB.getSession().uid
-      },
-      function(response){
-	var len = response.length;
-	for(var i =0; i < len; i++)
-	{
-	  var cookie = response[i];
-	  if(cookie.name == 'kt_just_installed' &&
-	     cookie.uid == FB.getSession().uid &&
-	     cookie.value == 1){
-	    this_obj.track_install_impl();
-	    FB.api(
-	      {
-		method  : 'data.setCookie',
-		name    : 'kt_just_installed',
-		uid     : FB.getSession().uid,
-		expires : Math.round((new Date()).getTime()/1000) - 345600
-	      }
-	    );
-	  }
-	}// for
-      }//function
-    );
-  },
-  track_install_impl: function()
-  {
     var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
+    if(parsed_qs['installed'] != undefined){
+      this.track_install_impl(parsed_qs);
+    }
+
+    // var this_obj = this;
+    // FB.api(
+    //   {
+    // 	method : 'data.getCookies',
+    // 	name   : 'kt_just_installed',
+    // 	uid    : FB.getSession().uid
+    //   },
+    //   function(response){
+    // 	var len = response.length;
+    // 	for(var i =0; i < len; i++)
+    // 	{
+    // 	  var cookie = response[i];
+    // 	  if(cookie.name == 'kt_just_installed' &&
+    // 	     cookie.uid == FB.getSession().uid &&
+    // 	     cookie.value == 1){
+    // 	    this_obj.track_install_impl();
+    // 	    FB.api(
+    // 	      {
+    // 		method  : 'data.setCookie',
+    // 		name    : 'kt_just_installed',
+    // 		uid     : FB.getSession().uid,
+    // 		expires : Math.round((new Date()).getTime()/1000) - 345600
+    // 	      }
+    // 	    );
+    // 	  }
+    // 	}// for
+    //   }//function
+    // );
+  },
+  track_install_impl: function(parsed_qs)
+  {
+    //var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
     var params = {
       s : FB.getSession().uid
     };

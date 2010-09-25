@@ -7,4 +7,4 @@ define("FB_SECRET", "3f8acfe3e69738ffd225d05e68dafbf8");
 define("KT_API_SERVER", "office.sfo.kontagent.com:8080");
 define("KT_API_KEY", "aaaa");
 define("KT_AUTO_PAGEVIEW_TRACKING", true); 
-define("SEND_MSG_VIA_JS", false);
+define("SEND_MSG_VIA_JS", true);
