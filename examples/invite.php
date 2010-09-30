@@ -1,13 +1,22 @@
 <?php
+require_once '../src/facebook.php';
 require_once '../kt/php/kt_config.php';
 require_once '../kt/php/kontagent.php';
+require_once '../kt/php/kt_facebook.php';
+
+$facebook = new KtFacebook(array('appId'  => FB_ID,
+                                 'secret' => FB_SECRET,
+                                 'cookie' => true,
+                                 )
+                           );
+
 $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
 $long_tracking_code = $kt->gen_long_tracking_code();
 
 $st1 = 'st111'; $st2 = 'st222'; $st3 = 'st333'; 
 $invite_post_link = $kt->gen_invite_post_link(FB_CALLBACK_URL,
                                               $long_tracking_code,
-                                              $uid,
+                                              $facebook->getUser(),
                                               "st111","st222","st333");
 $invite_content_link = $kt->gen_invite_content_link(FB_CANVAS_URL,
                                                     $long_tracking_code,
