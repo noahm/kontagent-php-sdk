@@ -6,10 +6,10 @@
 var origPostTarget = FB.Content.postTarget;
 FB.Content.postTarget = function(opts) {
   FB.Array.forEach(opts.params, function(val, key) {
-    if (typeof val == "object" || typeof val == "array") {
-      opts.params[key] = FB.JSON.stringify(val);
-    }
-  });
+		     if (typeof val == "object" || typeof val == "array") {
+		       opts.params[key] = FB.JSON.stringify(val);
+		     }
+		   });
   origPostTarget(opts);
 };
 
@@ -67,7 +67,7 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
           }
 	}
 
-	if(cb!=undefined || cb != null){
+	if(cb!=undefined && cb != null){
 	  var kt_cb = function(resp){
 	    if(resp && resp.post_id){
 	      // send a pst stream msg.
