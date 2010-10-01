@@ -484,15 +484,6 @@ Kontagent.prototype = {
     }
   },
 
-  get_session_uid : function()
-  {
-    var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
-    var uid = null;
-    if(parsed_qs['session'] != undefined)
-      uid = JSON.parse(parsed_qs['session'])['uid'];
-    return uid;
-  },
-
   gen_stream_link : function(link, uuid, st1, st2, st3)
   {
     var param_array = {kt_type : 'stream',
