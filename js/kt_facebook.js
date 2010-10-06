@@ -28,9 +28,10 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
   };
 
   FB.ui = function(params, cb){
-    var uid = FB.getSession().uid;
-    if(uid)
+	var session = FB.getSession();
+    if(session && session.uid)
     {
+		var uid = session.uid;
       var uuid = Math.uuid();
       var st1 = params['st1'];
       var st2 = params['st2'];
