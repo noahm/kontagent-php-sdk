@@ -83,7 +83,7 @@ class KtCommLayer
     public function gen_tracking_url($version, $msg_type, $params)
     {
         $params['ts'] = gmdate("Ymd.His");
-        $url = 'http://'.$this->m_host.":".$this->m_port."/api/".$version."/".$this->m_api_key."/".$msg_type."/?".http_build_query($params);
+        $url = 'http://'.$this->m_host.":".$this->m_port."/api/".$version."/".$this->m_api_key."/".$msg_type."/?".http_build_query($params,'','&');
         return $url;
     }
     

@@ -285,7 +285,7 @@ Kontagent.prototype = {
 
     // do we need to redirect?
     if(window.kt_redirect){
-      top.location.href = kt_redirect;
+      perform_redirect();
     }
   },
 
@@ -467,8 +467,14 @@ Kontagent.prototype = {
 
   kt_send_msg_via_img_tag : function(url_path)
   {
+    sending_message = true;
+
     var img = document.createElement('img');
-    img.src = url_path;
+	
+    img.onerror = img_msg_sent;
+	img.onload = img_msg_sent;
+	
+	img.src = url_path;
   },
 
   append_kt_query_str : function(original_url, query_str)
@@ -498,6 +504,20 @@ Kontagent.prototype = {
   }
 
 };
+
+function img_msg_sent() {
+	sending_message = false;
+}
+
+function perform_redirect() {
+   if (sending_message){
+	  setTimeout(perform_redirect, 10);
+   } else {
+	  top.location.href = kt_redirect;
+   }
+}
+
+var sending_message = false;
 
 if(window.SEND_MSG_VIA_JS){
   var kt = new Kontagent(KT_API_SERVER , KT_API_KEY);

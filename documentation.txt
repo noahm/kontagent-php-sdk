@@ -318,6 +318,16 @@ your post authorize URL. Once Facebook forwards back to your landing
 page which should already have kt_landing.php include, kt_landing.php
 will send Kontagent an apa message.
 
+Install Tracking (apa) Through Javascript
+-----------------------------------------
+If you include kontagent.js on your landing page, track_install() will
+send an install tracking message from the client's browser if it detects
+the "installed=1" parameter returned by Facebook. Duplicate install messages
+sent from both php and js are avoided through the use of a cookie.
+
+NOTE: Facebook made an API change that stopped sending the necessary data we
+need to track uninstalls to the post remove URL. Currently there is no way
+to track application removals using our API.
 
 
 Stream Send via the new Javascript SDK (pst?tu=stream)
