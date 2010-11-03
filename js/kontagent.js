@@ -503,3 +503,4 @@ if(window.SEND_MSG_VIA_JS){
   var kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
   kt.run();
 }
+
