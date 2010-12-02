@@ -403,15 +403,37 @@ Kontagent.prototype = {
     this.kt_outbound_msg('cpu', params);
   },
 
-  track_revenue : function(amount_in_cents)
+  track_revenue : function(amount_in_cents, revenue_type,
+			   st1, st2, st3)
   {
     var uid = FB.getSession().uid;
     if(uid)
     {
       var params = { s : uid,
-      v : amount_in_cents };
+		     v : amount_in_cents };
+      if(revenue_type != null) params['tu'] = revenue_type;
+      if(st1 != null) params['st1'] = st1;
+      if(st2 != null) params['st2'] = st2;
+      if(st3 != null) params['st3'] = st3;
       this.kt_outbound_msg('mtu', params);
     }
+  },
+
+  track_advertisement_revenue : function(amount_in_cents, st1, st2, st3)
+  {
+    this.track_revenue(amount_in_cents, "advertisement", st1, st2, st3);
+  },
+  track_credits_revenue : function(amount_in_cents, st1, st2, st3)
+  {
+    this.track_revenue(amount_in_cents, "credits", st1, st2, st3);
+  },
+  track_direct_revenue : function(amount_in_cents, st1, st2, st3)
+  {
+    this.track_revenue(amount_in_cents, "direct", st1, st2, st3);
+  },
+  track_indirect_revenue : function(amount_in_cents, st1, st2, st3)
+  {
+    this.track_revenue(amount_in_cents, "indirect", st1, st2, st3);
   },
 
   track_event : function(event_name, value, level,
@@ -470,10 +492,10 @@ Kontagent.prototype = {
     sending_message = true;
 
     var img = document.createElement('img');
-	
+
     img.onerror = img_msg_sent;
 	img.onload = img_msg_sent;
-	
+
 	img.src = url_path;
   },
 

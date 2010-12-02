@@ -386,19 +386,50 @@ class Kontagent
     }
     
 
-    public function gen_tracking_revenue_url($uid, $amount_in_cents)
+    public function gen_tracking_revenue_url($uid, $amount_in_cents,
+                                             $revenue_type=null, $st1=null, $st2=null, $st3=null)
     {
         $params = array('s' => $uid,
                         'v' => $amount_in_cents);
+        if(isset($revenue_type)) $params['tu'] = $revenue_type;
+        if(isset($st1)) $params['st1'] = $st1;
+        if(isset($st2)) $params['st2'] = $st2;
+        if(isset($st3)) $params['st3'] = $st3;
         return $this->m_kt_comm_layer->gen_tracking_url('v1', 'mtu', $params);
     }
-    public function track_revenue($uid, $amount_in_cents)
+    public function track_revenue($uid, $amount_in_cents,
+                                  $revenue_type=null, $st1=null, $st2=null, $st3=null)
     {
-        $tracking_url = $this->gen_tracking_revenue_url($uid, $amount_in_cents);
-        error_log($tracking_url); //xxx
+        $tracking_url = $this->gen_tracking_revenue_url($uid, $amount_in_cents,
+                                                        $revenue_type, $st1, $st2, $st3);
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 
+    public function track_advertisement_revenue($uid, $amount_in_cents,
+                                                $st1=null, $st2=null, $st3=null)
+    {
+        $this->track_revenue($uid, $amount_in_cents, "advertisement",
+                             $st1, $st2, $st3);
+    }
+    public function track_credits_revenue($uid, $amount_in_cents,
+                                          $st1=null, $st2=null, $st3=null)
+    {
+        $this->track_revenue($uid, $amount_in_cents, "credits",
+                             $st1, $st2, $st3);
+    }
+    public function track_direct_revenue($uid, $amount_in_cents,
+                                         $st1=null, $st2=null, $st3=null)
+    {
+        $this->track_revenue($uid, $amount_in_cents, "direct",
+                             $st1, $st2, $st3);
+    }
+    public function track_indirect_revenue($uid, $amount_in_cents,
+                                           $st1=null, $st2=null, $st3=null)
+    {
+        $this->track_revenue($uid, $amount_in_cents, "indirect",
+                             $st1, $st2, $st3);
+    }
+    
     public function gen_tracking_event_url($uid, $event_name, $value=null, $level=null,
                                            $st1=null, $st2=null, $st3=null)
     {

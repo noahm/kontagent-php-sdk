@@ -1,14 +1,9 @@
 <?php
-error_log("here");//xxx
 require_once '../src/facebook.php';
 require_once '../kt/php/kt_config.php';
 require_once '../kt/php/kontagent.php';
 require_once '../kt/php/kt_facebook.php';
 require_once '../kt/php/kt_landing.php';
-
-if(isset($_REQUEST['fb_mfs_step'])){
-    error_log('=====>fb_mfs_step:' . $_REQUEST['fb_mfs_step']);
-}
 
 $canvas_url = FB_CANVAS_URL;
 $canvas_callback_url = FB_CALLBACK_URL;
@@ -89,9 +84,30 @@ if(isset($_POST["clicked_button"])){
     }
     case "php revenue":
     {
-        $kt->track_revenue($uid, 110);
+        $kt->track_revenue($uid, 11110, "advertisement", "st111php", "st222php", "st3333php");
         break;
     }
+    case "php advertisement revenue":
+    {
+        $kt->track_advertisement_revenue($uid, 1110, "st1", "st22", "st333");
+        break;
+    }
+    case "php credits revenue":
+    {
+        $kt->track_credits_revenue($uid, 1110, "st1", "st22", "st333");
+        break;
+    }
+    case "php direct revenue":
+    {
+        $kt->track_direct_revenue($uid, 1120, "st1", "st22", "st333");
+        break;
+    }
+    case "php indirect revenue":
+    {
+        $kt->track_indirect_revenue($uid, 1130, "st1", "st22", "st333");
+        break;
+    }
+    
     case "php event":
     {
         $kt->track_event($uid, "test php event", 10, 2,
@@ -134,9 +150,11 @@ if(isset($_POST["clicked_button"])){
   <body>
     <div id="fb-root"></div>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="../kt/js/kontagent.js?v=40"></script>
-    <script src="../kt/js/kt_facebook.js?v=40"></script>
+    <script src="../kt/js/kontagent.js?v=43"></script>
+    <script src="../kt/js/kt_facebook.js?v=43"></script>
           
+    <fb:like ref="helloworld" font="arial"></fb:like>
+
     <h1><a href="">php-sdk</a></h1>
     <?php if ($me): ?>
     <a href="<?php echo $logoutUrl; ?>">
@@ -151,10 +169,20 @@ if(isset($_POST["clicked_button"])){
     <form method="POST" action="<?php echo $canvas_callback_url;?>">
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
          <input name="clicked_button" type="submit" value="php stream"/>
-         <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" />
+         <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" id="test_btn"/>
          <input name="clicked_button" type="button" value="js invite" onclick="test_js_invite()" />
          <input name="clicked_button" type="submit" value="php revenue"/>
+         <input name="clicked_button" type="submit" value="php advertisement revenue"/>
+         <input name="clicked_button" type="submit" value="php credits revenue"/>
+         <input name="clicked_button" type="submit" value="php direct revenue"/>
+         <input name="clicked_button" type="submit" value="php indirect revenue"/>
+          
          <input name="clicked_button" type="button" value="js revenue" onclick="test_js_revenue()"/>
+         <input name="clicked_button" type="button" value="js advertisement revenue" onclick="test_js_adveritisement_revenue()"/>
+         <input name="clicked_button" type="button" value="js credits revenue" onclick="test_js_credits_revenue()"/>
+         <input name="clicked_button" type="button" value="js direct revenue" onclick="test_js_direct_revenue()"/>
+         <input name="clicked_button" type="button" value="js indirect revenue" onclick="test_js_indirect_revenue()"/>
+          
          <input name="clicked_button" type="submit" value="php event"/>
          <input name="clicked_button" type="button" value="js event" onclick="test_js_event()"/>
          <input name="clicked_button" type="submit" value="php goal count"/>
@@ -188,20 +216,20 @@ $invite_post_link = $kt->gen_invite_post_link($canvas_callback_url,
                                               $long_tracking_code,
                                               $uid,
                                               "st111","st222","st333");
-error_log("--->>>".$invite_post_link);//xxx
 $invite_content_link = $kt->gen_invite_content_link($canvas_url,
                                                     $long_tracking_code,
                                                     'st111', 'st222', 'st333');
 
+echo "<p>invite_content_link: ".$invite_content_link."</p>";
+echo "<p>invite_post_link   : ".$invite_post_link."</p>";
 ?>
 
-<!--
 <fb:serverFbml>
 <script type="text/fbml">
 <fb:fbml>
     <fb:request-form
         method='POST'
-        action="http://www.cnn.com"
+        action="<?php echo $invite_post_link?>"
         invite='true'
         target='_top'
         type='XFBML'
@@ -213,13 +241,15 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
 </fb:fbml>
 </script>
 </fb:serverFbml>
--->    
+
    </body>
 </html>
 
 
   
 <script>
+
+
   function goto_invite_page(){
     window.parent.location.href = "<?php echo $canvas_url;?>invite.php?fb_force_mode=fbml";
   }
@@ -227,17 +257,21 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
   if(window.SESSION)
   {
       FB.init({
-            appId  : '117179248303858',
+            appId  : '143737522328410',
             xfbml  : true,  // parse XFBML
             session : SESSION
              });
   }else{
       FB.init({
-            appId  : '117179248303858',
+            appId  : '143737522328410',
             xfbml  : true,  // parse XFBML
              });
   }
 
+
+FB.Event.subscribe('edge.create', function(response){
+        
+    });
 
 function test_js_data_getcookie(){
     FB.api(
@@ -326,8 +360,21 @@ function test_js_invite(){
 
 
 function test_js_revenue(){
-    kt.track_revenue(220);
+    kt.track_revenue(220, "advertisement", "st111", "st222", "st3333");
 }
+function test_js_adveritisement_revenue(){
+    kt.track_advertisement_revenue(220, "st111", "st222", "st3333");
+}
+function test_js_credits_revenue(){
+    kt.track_credits_revenue(220, "st111", "st222", "st3333");
+}
+function test_js_direct_revenue(){
+    kt.track_direct_revenue(220, "st111", "st222", "st3333");
+}
+function test_js_indirect_revenue(){
+    kt.track_indirect_revenue(220, "st111", "st222", "st3333");
+}
+
 function test_js_event(){
     kt.track_event("js event", 2, 10, "jsSt1", "jsSt2", "jsSt3");
 }
