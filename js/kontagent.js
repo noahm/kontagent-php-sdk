@@ -403,7 +403,7 @@ Kontagent.prototype = {
     this.kt_outbound_msg('cpu', params);
   },
 
-  track_revenue : function(amount_in_cents, revenue_type,
+  track_revenue_impl : function(amount_in_cents, revenue_type,
 			   st1, st2, st3)
   {
     var uid = FB.getSession().uid;
@@ -418,22 +418,30 @@ Kontagent.prototype = {
       this.kt_outbound_msg('mtu', params);
     }
   },
-
+  // backward compatible
+  track_revenue : function(amount_in_cents)
+  {
+    this.track_revenue_impl(amount_in_cents, null, null, null, null);
+  },
   track_advertisement_revenue : function(amount_in_cents, st1, st2, st3)
   {
-    this.track_revenue(amount_in_cents, "advertisement", st1, st2, st3);
+    this.track_revenue_impl(amount_in_cents, "advertisement", st1, st2, st3);
   },
   track_credits_revenue : function(amount_in_cents, st1, st2, st3)
   {
-    this.track_revenue(amount_in_cents, "credits", st1, st2, st3);
+    this.track_revenue_impl(amount_in_cents, "credits", st1, st2, st3);
   },
   track_direct_revenue : function(amount_in_cents, st1, st2, st3)
   {
-    this.track_revenue(amount_in_cents, "direct", st1, st2, st3);
+    this.track_revenue_impl(amount_in_cents, "direct", st1, st2, st3);
   },
   track_indirect_revenue : function(amount_in_cents, st1, st2, st3)
   {
-    this.track_revenue(amount_in_cents, "indirect", st1, st2, st3);
+    this.track_revenue_impl(amount_in_cents, "indirect", st1, st2, st3);
+  },
+  track_other_revenue : function(amount_in_cents, st1, st2, st3)
+  {
+    this.track_revenue_impl(amount_in_cents, "other", st1, st2, st3);
   },
 
   track_event : function(event_name, value, level,

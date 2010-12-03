@@ -107,7 +107,11 @@ if(isset($_POST["clicked_button"])){
         $kt->track_indirect_revenue($uid, 1130, "st1", "st22", "st333");
         break;
     }
-    
+    case "php other revenue":
+    {
+        $kt->track_other_revenue($uid, 1130, "st1", "st22", "st333");
+        break;
+    }
     case "php event":
     {
         $kt->track_event($uid, "test php event", 10, 2,
@@ -176,12 +180,14 @@ if(isset($_POST["clicked_button"])){
          <input name="clicked_button" type="submit" value="php credits revenue"/>
          <input name="clicked_button" type="submit" value="php direct revenue"/>
          <input name="clicked_button" type="submit" value="php indirect revenue"/>
+         <input name="clicked_button" type="submit" value="php other revenue"/>
           
          <input name="clicked_button" type="button" value="js revenue" onclick="test_js_revenue()"/>
-         <input name="clicked_button" type="button" value="js advertisement revenue" onclick="test_js_adveritisement_revenue()"/>
+         <input name="clicked_button" type="button" value="js advertisement revenue" onclick="test_js_advertisement_revenue()"/>
          <input name="clicked_button" type="button" value="js credits revenue" onclick="test_js_credits_revenue()"/>
          <input name="clicked_button" type="button" value="js direct revenue" onclick="test_js_direct_revenue()"/>
          <input name="clicked_button" type="button" value="js indirect revenue" onclick="test_js_indirect_revenue()"/>
+         <input name="clicked_button" type="button" value="js other revenue" onclick="test_js_other_revenue()"/>
           
          <input name="clicked_button" type="submit" value="php event"/>
          <input name="clicked_button" type="button" value="js event" onclick="test_js_event()"/>
@@ -362,7 +368,7 @@ function test_js_invite(){
 function test_js_revenue(){
     kt.track_revenue(220, "advertisement", "st111", "st222", "st3333");
 }
-function test_js_adveritisement_revenue(){
+function test_js_advertisement_revenue(){
     kt.track_advertisement_revenue(220, "st111", "st222", "st3333");
 }
 function test_js_credits_revenue(){
@@ -373,6 +379,9 @@ function test_js_direct_revenue(){
 }
 function test_js_indirect_revenue(){
     kt.track_indirect_revenue(220, "st111", "st222", "st3333");
+}
+function test_js_other_revenue(){
+    kt.track_other_revenue(220, "st111", "st222", "st333");
 }
 
 function test_js_event(){
