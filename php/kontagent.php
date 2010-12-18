@@ -300,10 +300,8 @@ class Kontagent
     // if recipient_uid is not available, pass in null.
     public function gen_tracking_invite_click_url($recipient_uid)
     {
-        $installed = $this->is_app_authorized();
-
         $params = array( 'u' => $_GET['kt_ut'],
-                         'i' => $installed );
+                         'i' => 0 );
         if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
         if(isset($_GET['kt_st2'])) $params['st2'] = $_GET['kt_st2'];
         if(isset($_GET['kt_st3'])) $params['st3'] = $_GET['kt_st3'];
@@ -347,10 +345,8 @@ class Kontagent
 
     public function gen_tracking_stream_click_url($recipient_uid)
     {
-        $installed = $this->is_app_authorized();
-        
         $params = array('u' => $_GET['kt_ut'],
-                        'i' => $installed);
+                        'i' => 0);
         if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
         if(isset($_GET['kt_st2'])) $params['st2'] = $_GET['kt_st2'];
         if(isset($_GET['kt_st3'])) $params['st3'] = $_GET['kt_st3'];
@@ -367,10 +363,8 @@ class Kontagent
 
     public function gen_tracking_ucc_click_url($recipient_uid, $short_tag)
     {
-        $installed = $this->is_app_authorized();
-
         $params = array('tu' => $_GET['kt_type'],
-                        'i'  => $installed,
+                        'i'  => 0,
                         's' => $recipient_uid);
         if(isset($_GET['kt_st1'])) $params['st1'] = $_GET['kt_st1'];
         if(isset($_GET['kt_st2'])) $params['st2'] = $_GET['kt_st2'];
