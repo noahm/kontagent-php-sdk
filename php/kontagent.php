@@ -169,7 +169,7 @@ class Kontagent
     {
         $this->m_send_msg_from_js = $send_msg_from_js;
         $this->m_kt_api_key = $kt_api_key;
-        $host_port_arry = split(':', $kt_host);
+        $host_port_arry = preg_split('/:/', $kt_host);
         $this->m_kt_host = $host_port_arry[0];
         if(sizeof($host_port_arry) == 2){
             $this->m_kt_port = $host_port_arry[1];
@@ -193,7 +193,7 @@ class Kontagent
             $params['g'] = urlencode(strtoupper($user_info_json['gender']));
         }
         if(isset($user_info_json['birthday'])){
-            $birthday_components=split("/", $user_info_json['birthday']);
+            $birthday_components=preg_split("/\//", $user_info_json['birthday']);
             if(sizeof($birthday_components) == 3)
                 $params['b'] = urlencode(trim($birthday_components[2]));
             else
