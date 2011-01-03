@@ -18,6 +18,7 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
 {
   var KT_FB = {};
   KT_FB.ui = FB.ui;
+  KT_FB.api = FB.api;
   KT_FB.login = FB.login;
   KT_FB.kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
   KT_FB.prototype = {
@@ -99,6 +100,45 @@ if(window.KT_API_SERVER && window.KT_API_KEY)
     }
 
   };//FB.ui = function...
+
+  FB.api = function(){
+    if(typeof arguments[0] == 'string'){
+      if(arguments[0].search('/feed') > 0){
+	var session = FB.getSession();
+
+	if(session && session.uid){
+	  var uid = session.uid;
+	  var params = arguments[2];
+	  // make sure that the link is supplied by the user
+	  var uuid = Math.uuid();
+	  var st1 = params["st1"];
+	  var st2 = params["st2"];
+	  var st3 = params["st3"];
+
+	  if(params["link"] != undefined){
+	    params["link"] = KT_FB.kt.gen_stream_link(params["link"], uuid, st1, st2, st3);
+	    arguments[2] = params;
+	  }
+
+	  var cb = arguments[arguments.length-1];
+	  var kt_cb = function(resp){
+	    if (!resp || resp.error) {
+	      //error
+	    }else{
+	      KT_FB.kt.kt_outbound_msg('pst',
+				       {tu : 'stream', u : uuid, s : uid,
+					st1 : st1, st2 : st2, st3 : st3});
+	    }
+	    cb(resp); // call the original callback function
+	  };
+	  arguments[arguments.length-1] = kt_cb;
+	}
+      }
+      FB.ApiServer.graph.apply(FB.ApiServer, arguments);
+    }else{
+      FB.ApiServer.rest.apply(FB.ApiServer, arguments);
+    }
+  };//FB.api = function...
 
   FB.login = function( cb, opts ){
     var kt_cb = function(resp){

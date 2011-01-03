@@ -173,7 +173,8 @@ if(isset($_POST["clicked_button"])){
     <form method="POST" action="<?php echo $canvas_callback_url;?>">
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
          <input name="clicked_button" type="submit" value="php stream"/>
-         <input name="clicked_button" type="button" value="js stream" onclick="test_js_stream()" id="test_btn"/>
+         <input name="clicked_button" type="button" value="js stream(FB.ui)" onclick="test_js_ui_stream()" id="test_btn"/>
+         <input name="clicked_button" type="button" value="js stream(FB.api)" onclick="test_js_api_stream()" id="test_btn"/>
          <input name="clicked_button" type="button" value="js invite" onclick="test_js_invite()" />
          <input name="clicked_button" type="submit" value="php revenue"/>
          <input name="clicked_button" type="submit" value="php advertisement revenue"/>
@@ -287,9 +288,12 @@ function test_js_data_getcookie(){
           uid  : FB.getSession().uid
         },
         function(response){
-            console.log(response);//xxxx
-        }
-           );
+            if (!response || response.error) {
+                alert('Error occured');
+            } else {
+                alert('Post ID: ' + response.id);
+            }
+        });
 }
 
 function test_js_data_setcookie(){
@@ -307,7 +311,7 @@ function test_js_data_setcookie(){
            );
 }
 
-function test_js_stream(){
+function test_js_ui_stream(){
     FB.ui(
    {
      st1 : 'stream_st1',
@@ -341,6 +345,22 @@ function test_js_stream(){
 /*        console.log("og cb");//xxx */
 /*    } */
   );
+}
+
+function test_js_api_stream(){
+    FB.api('me/feed',
+           'post',
+           {message : "hello world",
+            link    : 'http://apps.facebook.com/kontagent-php/',
+            st1     : "st1_api",
+            st2     : "st2_api",
+            st3     : "st3_api",
+            picture : 'http://icanhascheezburger.files.wordpress.com/2009/03/funny-pictures-kitten-finished-his-milk-and-wants-a-cookie.jpg',
+            caption : "yada",
+            name    : 'click me!'},
+           function(resp){
+               alert("got a resp back");//xxx
+           });
 }
 
 function test_js_invite(){
