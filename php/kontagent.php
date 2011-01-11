@@ -294,7 +294,8 @@ class Kontagent
     public function track_invite_sent()
     {
         $tracking_url = $this->gen_tracking_invite_sent_url();
-        $this->m_kt_comm_layer->api_call_method($tracking_url);
+        if(isset($_REQUEST['ids']))
+           $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 
     // if recipient_uid is not available, pass in null.
