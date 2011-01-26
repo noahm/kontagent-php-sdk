@@ -272,6 +272,18 @@ class Kontagent
         $this->m_kt_comm_layer->api_call_method($tracking_url);
     }
 
+    
+    public function gen_tracking_uninstall_url($uid)
+    {
+        $params = array('s' => $uid);
+        return $this->m_kt_comm_layer->gen_tracking_url('v1', 'apr', $params);
+    }
+    public function track_uninstall($uid)
+    {
+        $tracking_url = $this->gen_tracking_uninstall_url($uid);
+        $this->m_kt_comm_layer->api_call_method($tracking_url);
+    }
+    
     //
     // When fb forwards back the control back to the callback url after
     // invite sent, fb_sig_user is no where to be found. That's why we need
