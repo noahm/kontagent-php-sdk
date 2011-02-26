@@ -283,6 +283,12 @@ Kontagent.prototype = {
       this.kt_send_msg_via_img_tag(kt_landing_str);
     }
 
+    if(window.kt_message_queue){
+      for(var i = 0; i < window.kt_message_queue.length; i++){
+	this.kt_send_msg_via_img_tag(window.kt_message_queue[i]);
+      }
+    }
+
     // do we need to redirect?
     if(window.kt_redirect){
       perform_redirect();

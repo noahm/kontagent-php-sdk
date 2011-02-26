@@ -33,7 +33,7 @@ if($session){
 }
 
 if(SEND_MSG_VIA_JS){
-    echo "<script>var SEND_MSG_VIA_JS = true; var FB_ID='".FB_ID."'</script>";
+    echo "<script>var SEND_MSG_VIA_JS = true; var FB_ID='".FB_ID."'; var kt_message_queue = [];</script>";
     if($uid){
         echo "<script>var SESSION = ".json_encode($session).";</script>";
     }

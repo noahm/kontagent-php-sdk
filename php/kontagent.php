@@ -44,6 +44,10 @@ class Kontagent
         }        
         return $r;
     }
+
+    private function append_to_js_msg_queue($msg){
+        echo "<script>kt_message_queue.push('".$msg."');</script>";
+    }
     
     public function get_send_msg_from_js()
     {
@@ -465,7 +469,11 @@ class Kontagent
     {
         $tracking_url = $this->gen_tracking_event_url($uid, $event_name, $value, $level,
                                                       $subtype1, $subtype2, $subtype3);
-        $this->m_kt_comm_layer->api_call_method($tracking_url);
+        if($this->m_send_msg_from_js){
+            $this->append_to_js_msg_queue($tracking_url);
+        }else{
+            $this->m_kt_comm_layer->api_call_method($tracking_url);
+        }
     }
 
 
