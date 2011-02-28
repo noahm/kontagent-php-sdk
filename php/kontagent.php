@@ -406,6 +406,7 @@ class Kontagent
         if(isset($st1)) $params['st1'] = $st1;
         if(isset($st2)) $params['st2'] = $st2;
         if(isset($st3)) $params['st3'] = $st3;
+
         return $this->m_kt_comm_layer->gen_tracking_url('v1', 'mtu', $params);
     }
 
@@ -414,7 +415,11 @@ class Kontagent
     {
         $tracking_url = $this->gen_tracking_revenue_url($uid, $amount_in_cents,
                                                         $revenue_type, $st1, $st2, $st3);
-        $this->m_kt_comm_layer->api_call_method($tracking_url);
+        if($this->m_send_msg_from_js){
+            $this->append_to_js_msg_queue($tracking_url);
+        }else{
+            $this->m_kt_comm_layer->api_call_method($tracking_url);
+        }
     }
     // backward compatible
     public function track_revenue($uid, $amount_in_cents)
@@ -475,7 +480,6 @@ class Kontagent
             $this->m_kt_comm_layer->api_call_method($tracking_url);
         }
     }
-
 
     public function gen_tracking_goal_count($uid, $goal_counts)
     {
