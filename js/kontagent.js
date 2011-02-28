@@ -255,19 +255,22 @@ function Kontagent(kt_host, kt_api_key){
   this.kt_api_key = kt_api_key;
   this.kt_host = kt_host;
   this.version = 'v1';
+  this.kt_apprequests_data_delim = '|kt_data:|';
 };
 
 Kontagent.prototype = {
   run : function()
   {
+    // capture invite received by taking a look at request_ids
+    var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
+    if(parsed_qs['request_ids'] != undefined){
+      this.track_inr(parsed_qs['request_ids']);
+    }
+
     // capture install
     if(window.SESSION){
       // this is for handling login from the php side
-      var browser_install_cookie_key = this.gen_kt_handled_installed_cookie_key(FB_ID, SESSION['uid']);
-      if( !getCookie(browser_install_cookie_key) ){
-	this.track_install();
-	setCookie(browser_install_cookie_key, 'done');
-      }
+      this.track_install();
     }
 
     // capture User Info
@@ -305,62 +308,67 @@ Kontagent.prototype = {
     return 'kt_capture_user_info_'+app_id+"_"+uid;
   },
 
-  track_install : function()
+  track_inr : function(request_ids)
   {
+    if(window.SESSION){
+      var _this_obj = this;
+      FB.api('/'+request_ids+'?access_token='+window.SESSION.access_token,
+	     function(resp){
+	       if(resp['error']==undefined){
+		 var ut = null;
+		 var params = {i:0};
+		 var r = resp['to']['id'];
+		 params['r'] = r;
+		 var kt_param_qs = resp['data'].split(_this_obj.kt_apprequests_data_delim)[1];
+		 var kt_params = kt_param_qs.split('&');
+		 for(var i = 0 ; i < kt_params.length; i++){
+		   var kv_pair = kt_params[i].split('=');
+		   if(kv_pair[0] == 'u') ut = kv_pair[1];
+		   params[kv_pair[0]] = kv_pair[1];
+		 }
+		 _this_obj.kt_outbound_msg('inr', params);
+		 if(ut!=null){
+		   _this_obj.track_install(ut);
+		 }
+		 // clean up
+		 FB.api('/'+request_ids+'?access_token='+window.SESSION.access_token, 'delete');
+	       }
+	     }
+	    );
+    }
+  },
+
+  track_install : function(ut)
+  {
+    var browser_install_cookie_key = this.gen_kt_handled_installed_cookie_key(FB_ID, SESSION['uid']);
+    if( getCookie(browser_install_cookie_key) ) return;
     if(!window.SESSION) return;
+
     if(FB._session == null || FB._session == undefined){
       FB.init({appId   : FB_ID,
 	       xfbml   : true,
 	       session : SESSION
 	      });
     }
+    var params = { s : FB.getSession().uid };
 
     var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
     if(parsed_qs['installed'] != undefined){
-      this.track_install_impl(parsed_qs);
+      if(parsed_qs['request_ids']==undefined && /* ugly work around to prevent double sending of apa for inr via FB apprequests dialog */
+	 ut == undefined){
+	if(parsed_qs['kt_ut'] != undefined){
+	  params['u'] = parsed_qs['kt_ut'];
+	}else if(parsed_qs['kt_sut'] !=undefined){
+	  params['su'] = parsed_qs['kt_sut'];
+	}
+	this.kt_outbound_msg('apa', params);
+	setCookie(browser_install_cookie_key, 'done');
+      }else if(ut != undefined){
+	params['u'] = ut;
+	this.kt_outbound_msg('apa', params);
+	setCookie(browser_install_cookie_key, 'done');
+      }
     }
-
-    // var this_obj = this;
-    // FB.api(
-    //   {
-    // 	method : 'data.getCookies',
-    // 	name   : 'kt_just_installed',
-    // 	uid    : FB.getSession().uid
-    //   },
-    //   function(response){
-    // 	var len = response.length;
-    // 	for(var i =0; i < len; i++)
-    // 	{
-    // 	  var cookie = response[i];
-    // 	  if(cookie.name == 'kt_just_installed' &&
-    // 	     cookie.uid == FB.getSession().uid &&
-    // 	     cookie.value == 1){
-    // 	    this_obj.track_install_impl();
-    // 	    FB.api(
-    // 	      {
-    // 		method  : 'data.setCookie',
-    // 		name    : 'kt_just_installed',
-    // 		uid     : FB.getSession().uid,
-    // 		expires : Math.round((new Date()).getTime()/1000) - 345600
-    // 	      }
-    // 	    );
-    // 	  }
-    // 	}// for
-    //   }//function
-    // );
-  },
-  track_install_impl: function(parsed_qs)
-  {
-    //var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
-    var params = {
-      s : FB.getSession().uid
-    };
-    if(parsed_qs['kt_ut'] != undefined){
-      params['u'] = parsed_qs['kt_ut'];
-    }else if(parsed_qs['kt_sut'] !=undefined){
-      params['su'] = parsed_qs['kt_sut'];
-    }
-    this.kt_outbound_msg('apa', params);
   },
 
   track_user_info : function()
@@ -537,8 +545,20 @@ Kontagent.prototype = {
     var query_str = http_build_query(param_array);
     var mod_link = this.append_kt_query_str(link, query_str);
     return mod_link;
-  }
+  },
 
+  append_kt_tracking_info_to_apprequests : function(data /*string*/, uuid, st1,st2,st3)
+  {
+    var param_array = {u : String(uuid),
+		       st1 : st1,
+		       st2 : st2,
+		       st3 : st3};
+    var query_str = http_build_query(param_array);
+    if(data == undefined)
+      data = "";
+    data = data + this.kt_apprequests_data_delim + query_str;
+    return data;
+  }
 };
 
 function img_msg_sent() {
@@ -555,7 +575,8 @@ function perform_redirect() {
 
 var sending_message = false;
 
-if(window.SEND_MSG_VIA_JS){
+var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
+if(window.SEND_MSG_VIA_JS || window.USE_FB_DIALOG_JS || parsed_qs['request_ids'] != undefined){
   var kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
   kt.run();
 }

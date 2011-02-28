@@ -32,7 +32,11 @@ if($session){
     }
 }
 
-if(SEND_MSG_VIA_JS){
+if(USE_FB_DIALOG_JS){
+    echo "<script>var USE_FB_DIALOG_JS=true;</script>";
+}
+
+if(SEND_MSG_VIA_JS || $_GET['request_ids']){
     echo "<script>var SEND_MSG_VIA_JS = true; var FB_ID='".FB_ID."'; var kt_message_queue = [];</script>";
     if($uid){
         echo "<script>var SESSION = ".json_encode($session).";</script>";
@@ -89,7 +93,7 @@ if($uid){
         /***
          * Facebook made installed=1 available again. We are going to take advantage of that.
          */
-        if(isset($_GET['installed'])){
+        if(isset($_GET['installed']) & !isset($_GET['request_ids'])){
             $kt->track_install($uid);
         }
         
@@ -128,13 +132,16 @@ if(isset($_GET['kt_type']))
                 "';</script>";
         }
 
+        
         // If your user gets forwarded outside of facebook,
         // call $facebook->redirect([canvas url]) to forward your
         // user back. 
+        // $facebook->redirect(FB_CANVAS_URL);
         break;
     }
     case 'inr':
     {
+        error_log($_SERVER['HTTP_REFERER']);//xxx
         if(!$kt->get_send_msg_from_js()){
             $kt->track_invite_received($uid);
             // If it doesn't get rid of the the forward the kt_* parameters, except
