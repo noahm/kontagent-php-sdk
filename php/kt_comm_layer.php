@@ -104,8 +104,13 @@ class KtCommLayer
                 fwrite($this->m_socket, "Content-type: application/x-www-form-urlencoded\r\n");
                 fwrite($this->m_socket, "Accept: */*\r\n");
                 fwrite($this->m_socket, "\r\n");
-                fwrite($this->m_socket, "\r\n");
-                
+
+                if($this->m_host == 'test-server.kontagent.net' ||
+                   $this->m_host == 'test-server.kontagent.com' ){
+                    while (!feof($m_socket)) {
+                        fgets($m_socket, 1024);
+                    }
+                }
                 fclose($this->m_socket);
                 $this->m_socket = false;
             }
