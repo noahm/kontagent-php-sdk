@@ -20,6 +20,7 @@ $kt = new Kontagent(KT_API_SERVER, KT_API_KEY, SEND_MSG_VIA_JS);
 
 //$session = $facebook->fbNativeAppRequireLogin(array('req_perms'=>'publish_stream,user_birthday,user_relationships',
 //                                                    'display'=>'popup')); //lihchen
+
 $session = $facebook->fbNativeAppRequireLogin(array('canvas'=>1, 'fbconnect'=>0,
                                                     'req_perms'=>'publish_stream,user_birthday,user_relationships')); //lihchen
 
@@ -54,6 +55,7 @@ if ($me) {
 
 // This call will always work since we are fetching public data.
 $naitik = $facebook->api('/naitik');
+
 
 if(isset($_POST["clicked_button"])){
     switch($_POST["clicked_button"])
@@ -153,9 +155,17 @@ if(isset($_POST["clicked_button"])){
   </head>
   <body>
     <div id="fb-root"></div>
-    <script src="http://connect.facebook.net/en_US/all.js"></script>
-    <script src="../kt/js/kontagent.js?v=43"></script>
-    <script src="../kt/js/kt_facebook.js?v=43"></script>
+    <script src="http://connect.facebook.net/en_US/all.js?v=44"></script>
+
+    <script>CONTROL_KT_RUN = true;</script>
+    <script src="../kt/js/kontagent.js?v=44"></script>
+    <script src="../kt/js/kt_facebook.js?v=44"></script>
+    <script>
+          kt.post_invite_click_cb = function(data){
+          }  
+          kt.run();
+    </script>
+          
           
     <fb:like ref="helloworld" font="arial"></fb:like>
 
@@ -171,6 +181,14 @@ if(isset($_POST["clicked_button"])){
     <?php endif ?>
 
     <form method="POST" action="<?php echo $canvas_callback_url;?>">
+         <h2>FB Dialog</h2> 
+         <input name="clicked_button" type="button" value="FB Feed Dialog" onclick="test_fb_feed_dialog()"/>
+         <input name="clicked_button" type="button" value="FB Request Dialog" onclick="test_fb_request_dialog_many()"/>          
+         <input name="clicked_button" type="button" value="FB Request Content" onclick="test_fb_request_content()"/>
+         <input name="clicked_button" type="button" value="Delete FB Request Content" onclick="test_fb_delete_request_content()"/>
+         <input name="clicked_button" type="button" value="FB Oauth" onclick="test_fb_oauth()"/>
+          
+         <h2>Other Stuff</h2> 
          <input name="clicked_button" type="submit" value="dashboard.addNews" />
          <input name="clicked_button" type="submit" value="php stream"/>
          <input name="clicked_button" type="button" value="js stream(FB.ui)" onclick="test_js_ui_stream()" id="test_btn"/>
@@ -229,6 +247,7 @@ $invite_content_link = $kt->gen_invite_content_link($canvas_url,
 
 echo "<p>invite_content_link: ".$invite_content_link."</p>";
 echo "<p>invite_post_link   : ".$invite_post_link."</p>";
+echo print_r($facebook->getSignedRequest(),1);
 ?>
 
 <fb:serverFbml>
@@ -276,8 +295,16 @@ echo "<p>invite_post_link   : ".$invite_post_link."</p>";
   }
 
 
-FB.Event.subscribe('edge.create', function(response){
-        
+FB.Event.subscribe('edge.create', function(href, widget){
+        var qs = href.split('?')[1];
+        var key_value_pair = qs.split('&')
+        for(var i = 0; i < key_value_pair.length; i++){
+            var tmp = key_value_pair[i].split('=');
+            var key = tmp[0];
+            var val = tmp[1]
+            if(key_value_pair[i].split('=')[0] == 'signed_request')
+                console.log(val);
+        }
     });
 
 function test_js_data_getcookie(){
@@ -309,6 +336,79 @@ function test_js_data_setcookie(){
             console.log(response); 
         }
            );
+}
+
+function test_fb_feed_dialog(){
+  // http://developers.facebook.com/docs/reference/javascript/FB.ui/
+  FB.ui(
+    {
+      method: 'feed',
+      name: 'KT Facebook Dialogs',
+      link: 'http://apps.facebook.com/kontagent_php/',
+      picture: 'http://fbrell.com/f8.jpg',
+      caption: 'Caption Goes Here',
+      description: 'Kontagent integrates with the new facebook dialogs seamlessly!!',
+      message: 'Kontagent Facebook Dialogs are easy'
+     },
+    function(response) {
+      if (response && response.post_id) {
+	alert('Post was published.');
+      } else {
+	alert('Post was not published.');
+      }
+    }
+  );
+}
+
+function test_fb_request_dialog_many(){
+    FB.ui(
+        {
+          method: 'apprequests', 
+                message: 'You should learn more about this awesome game.', 
+                data: {'data': 'tracking information for the user'},
+                st1: 'st111',
+                st2: 'st22',
+                st3: 'st333'
+                },
+        function(response){
+
+        }
+          );  
+}
+
+function test_fb_request_content(){
+  FB.api(  
+    '/1879529905761',
+    function(response){
+            debugger;//xxx
+        console.log(response);//xxx
+    }
+  );
+}
+
+function test_fb_delete_request_content(){
+  var request_ids=1858020888362; // get rid of the hardcoding
+  FB.api(
+      '/1858020888362','delete'
+         );
+}
+
+function test_fb_oauth(){
+  FB.ui(
+    {
+      method: 'oauth',
+      /* client_id: '143737522328410', */
+      /* scope: 'email, publish_stream, offline_access, user_checkins', */
+      /* redirect_uri: 'http://apps.facebook.com/kontagent_php/' */
+    },
+    function (response) {
+      if (response && response.post_id) {
+	alert('success');
+      } else {
+	alert('failure');
+      }
+    }
+  );
 }
 
 function test_js_ui_stream(){
@@ -351,7 +451,7 @@ function test_js_api_stream(){
     FB.api('me/feed',
            'post',
            {message : "hello world",
-            link    : 'http://apps.facebook.com/kontagent-php/',
+            link    : 'http://apps.facebook.com/kontagent_php/',
             st1     : "st1_api",
             st2     : "st2_api",
             st3     : "st3_api",
@@ -414,6 +514,8 @@ function test_js_goal_count(){
 function test_js_multi_goal_count(){
     kt.track_multi_goal_counts(kt.get_session_uid(), {1:10, 2:20});
 }
+
+
 
 </script>
       

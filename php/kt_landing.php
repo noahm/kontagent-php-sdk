@@ -36,7 +36,7 @@ if(USE_FB_DIALOG_JS){
     echo "<script>var USE_FB_DIALOG_JS=true;</script>";
 }
 
-if(SEND_MSG_VIA_JS || $_GET['request_ids']){
+if(SEND_MSG_VIA_JS || isset($_GET['request_ids'])){
     echo "<script>var SEND_MSG_VIA_JS = true; var FB_ID='".FB_ID."'; var kt_message_queue = [];</script>";
     if($uid){
         echo "<script>var SESSION = ".json_encode($session).";</script>";
@@ -93,7 +93,7 @@ if($uid){
         /***
          * Facebook made installed=1 available again. We are going to take advantage of that.
          */
-        if(isset($_GET['installed']) & !isset($_GET['request_ids'])){
+        if(isset($_GET['installed']) && !isset($_GET['request_ids'])){
             $kt->track_install($uid);
         }
         

@@ -255,7 +255,8 @@ function Kontagent(kt_host, kt_api_key){
   this.kt_api_key = kt_api_key;
   this.kt_host = kt_host;
   this.version = 'v1';
-  this.kt_apprequests_data_delim = '|kt_data:|';
+
+  this.post_invite_click_cb = null;
 };
 
 Kontagent.prototype = {
@@ -315,23 +316,27 @@ Kontagent.prototype = {
       FB.api('/'+request_ids+'?access_token='+window.SESSION.access_token,
 	     function(resp){
 	       if(resp['error']==undefined){
-		 var ut = null;
-		 var params = {i:0};
-		 var r = resp['to']['id'];
-		 params['r'] = r;
-		 var kt_param_qs = resp['data'].split(_this_obj.kt_apprequests_data_delim)[1];
-		 var kt_params = kt_param_qs.split('&');
-		 for(var i = 0 ; i < kt_params.length; i++){
-		   var kv_pair = kt_params[i].split('=');
-		   if(kv_pair[0] == 'u') ut = kv_pair[1];
-		   params[kv_pair[0]] = kv_pair[1];
+		 if(resp['data'] != undefined){
+		   var data = JSON.parse(resp['data']);
+		   if(data['kt_params'] != undefined){
+		     var kt_params = data['kt_params'];
+		     kt_params["i"] = 0;
+		     kt_params["r"] = resp['to']['id'];
+		     _this_obj.kt_outbound_msg('inr', kt_params);
+		     var ut = kt_params['u'];
+		     if(ut!=undefined){
+		       _this_obj.track_install(ut);
+		     }
+		     // clean up
+		     FB.api('/'+request_ids+'?access_token='+window.SESSION.access_token, 'delete');
+		     if(_this_obj.post_invite_click_cb != undefined && _this_obj.post_invite_click_cb != null){
+		       if(data['original_data'] != undefined)
+			 _this_obj.post_invite_click_cb(resp);
+		       else
+			 _this_obj.post_invite_click_cb(null);
+		     }
+		   }
 		 }
-		 _this_obj.kt_outbound_msg('inr', params);
-		 if(ut!=null){
-		   _this_obj.track_install(ut);
-		 }
-		 // clean up
-		 FB.api('/'+request_ids+'?access_token='+window.SESSION.access_token, 'delete');
 	       }
 	     }
 	    );
@@ -549,15 +554,21 @@ Kontagent.prototype = {
 
   append_kt_tracking_info_to_apprequests : function(data /*string*/, uuid, st1,st2,st3)
   {
-    var param_array = {u : String(uuid),
-		       st1 : st1,
-		       st2 : st2,
-		       st3 : st3};
-    var query_str = http_build_query(param_array);
-    if(data == undefined)
-      data = "";
-    data = data + this.kt_apprequests_data_delim + query_str;
-    return data;
+    var new_data = {};
+    var kt_param_dict = {u : String(uuid)};
+    if(st1 != undefined && st1 != null){
+      kt_param_dict['st1'] = st1;
+    }
+    if(st2 != undefined && st2 != null){
+      kt_param_dict['st2'] = st2;
+    }
+    if(st3 != undefined && st3 != null){
+      kt_param_dict['st3'] = st3;
+    }
+    new_data['kt_params'] =  kt_param_dict;
+    if(data != undefined)
+      new_data['original_data'] = data;
+    return new_data;
   }
 };
 
@@ -577,7 +588,18 @@ var sending_message = false;
 
 var parsed_qs = parse_str(window.location.search.substring(1,window.location.search.length));
 if(window.SEND_MSG_VIA_JS || window.USE_FB_DIALOG_JS || parsed_qs['request_ids'] != undefined){
-  var kt = new Kontagent(KT_API_SERVER , KT_API_KEY);
+  kt = new Kontagent(KT_API_SERVER , KT_API_KEY); //global variable
+}
+
+try{
+  if(CONTROL_KT_RUN != true){
+    kt.run();
+  }
+}catch(e){
+  //CONTROL_KT_RUN is not defined
   kt.run();
 }
+
+
+
 

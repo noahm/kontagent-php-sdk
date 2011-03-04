@@ -445,4 +445,81 @@ to prevent future round trip time between Facebook and your app server
 caused by calling data.getcookies per page load.
 
 
+New FB Dialog:
+-------------
+First in your kt_config.php, set USE_FB_DIALOG_JS to true.
 
+Assumption: You are still using our fbNativeAppRequireLogin() or
+getLoginUrl() to redirect your users to the authorization page. You
+are not using OAuth Dialog from Facebook.
+
+On the receiving end of an apprequest, our library extracts
+Kontagent tracking information from the request object and delete it
+automatically. If you'd like to access the request_object, you need to
+provide us a callback function, so that we can pass the request_object
+back to callback function.
+
+<script>CONTROL_KT_RUN = true;</script>
+<script src="../kt/js/kontagent.js?v=44"></script>
+<script src="../kt/js/kt_facebook.js?v=44"></script>
+<script>
+      kt.post_invite_click_cb = function(resp){
+      }
+      kt.run();
+</script>
+
+Otherwise, do 
+<script src="http://connect.facebook.net/en_US/all.js?v=44"></script>
+<script src="../kt/js/kontagent.js"></script>
+<script src="../kt/js/kt_facebook.js"></script>
+
+
+
+Request Dialog
+--------------
+Example:
+ FB.ui(
+       {
+	 method: 'apprequests', 
+         message: 'You should learn more about this awesome game.', 
+         data: 'tracking information for the user',
+         st1: 'st111',
+         st2: 'st22',
+         st3: 'st333'
+       },
+       function(response){
+        
+       }
+      );  
+
+You simply need to supply the optional subtype1, subtype2, subtype3 parameters.
+Upon invite click, Kontagent deletes the request id on your behalf. 
+
+
+Feed Dialog
+-----------
+Example:
+  FB.ui(
+    {
+      method: 'feed',
+      name: 'KT Facebook Dialogs',
+      link: 'http://apps.facebook.com/kontagent_php/',
+      picture: 'http://fbrell.com/f8.jpg',
+      caption: 'Caption Goes Here',
+      description: 'Kontagent integrates with the new facebook dialogs seamlessly!!',
+      message: 'Kontagent Facebook Dialogs are easy',
+      st1: 'st111',
+      st2: 'st22',
+      st3: 'st3'
+     },
+    function(response) {
+    
+    }
+  );
+
+Again you simply need to supply the optional subtype1, subytpe2. subtype3 paramters.
+
+We reply on the data field to pass kontagent tracking info between the
+sending and the recipient side. We append |kt_data:| to the existing
+data field when an invite is about to be sent out. On the receiving
+end, we parse out |kt_data:| and extract the string after that.
