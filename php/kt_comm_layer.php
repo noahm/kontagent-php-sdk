@@ -107,8 +107,8 @@ class KtCommLayer
 
                 if($this->m_host == 'test-server.kontagent.net' ||
                    $this->m_host == 'test-server.kontagent.com' ){
-                    while (!feof($m_socket)) {
-                        fgets($m_socket, 1024);
+                    while (!feof($this->m_socket)) {
+                        fgets($this->m_socket, 1024);
                     }
                 }
                 fclose($this->m_socket);
