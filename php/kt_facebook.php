@@ -33,9 +33,7 @@ class KtFacebook extends Facebook
             return $session;
         }
         
-        $http_referer = $_SERVER['HTTP_REFERER'];
-        if(preg_match('/http:\/\/apps.facebook.com*/', $http_referer))
-        {
+        if (isset($_SERVER['HTTP_REFERER']) && preg_match('/http:\/\/apps.facebook.com*/', $_SERVER['HTTP_REFERER'])) {
             $this->redirect($this->getLoginUrl($params, false));
         }
         else
